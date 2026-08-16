@@ -1,0 +1,14 @@
+# 統一用 LF。開發在 Windows、CI 跑 Linux 容器（見系列 Day 23），
+# 不統一的話 diff 會滿江紅，截圖的像素比對基準線也會受影響。
+* text=auto eol=lf
+
+# 產線的產物與素材一律當二進位，不要做換行轉換
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webm binary
+*.mp4  binary
+*.docx binary
+*.pdf  binary
+*.ico  binary

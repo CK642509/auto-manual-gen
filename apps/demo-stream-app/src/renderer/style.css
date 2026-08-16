@@ -1,0 +1,389 @@
+:root {
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --line: #e2e6ee;
+  --text: #1c2430;
+  --muted: #6b7683;
+  --accent: #2f6df6;
+  --warn: #e5544b;
+  --ok: #1f9d67;
+  font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 13px;
+}
+
+/* ---------- topbar ---------- */
+.topbar {
+  height: 56px;
+  padding: 0 24px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.runtime {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+/* ---------- layout ---------- */
+.content {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.card-value.warn {
+  color: var(--warn);
+}
+
+/* ---------- panel ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+}
+
+/* ---------- live view ----------
+   刻意做成「每次截圖都不一樣」：飄移的偵測框 + 跳動的時間戳 + 變動的偵測數。
+   產線要靠停用動畫、注入固定時間、攔截 API 才拍得穩（Day 07 / Day 08）。 */
+.viewport {
+  position: relative;
+  height: 260px;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 30% 20%, #33445c 0%, #1b2432 55%, #121822 100%);
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035) 0px,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.det {
+  position: absolute;
+  border: 2px solid #52e08a;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.det span {
+  position: absolute;
+  top: -20px;
+  left: -2px;
+  background: #52e08a;
+  color: #10231a;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px 3px 0 0;
+  white-space: nowrap;
+}
+
+.det-a {
+  width: 84px;
+  height: 128px;
+  top: 74px;
+  left: 132px;
+  animation: drift-a 7s ease-in-out infinite alternate;
+}
+
+.det-b {
+  width: 140px;
+  height: 76px;
+  top: 128px;
+  left: 420px;
+  border-color: #f0b429;
+  animation: drift-b 9s ease-in-out infinite alternate;
+}
+
+.det-b span {
+  background: #f0b429;
+  color: #2a1d02;
+}
+
+@keyframes drift-a {
+  to {
+    transform: translate(48px, -16px);
+  }
+}
+
+@keyframes drift-b {
+  to {
+    transform: translate(-62px, 10px);
+  }
+}
+
+.viewport-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(10, 14, 20, 0.6);
+  color: #cfd6e0;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 12px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ---------- license ---------- */
+.license {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.license-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.license-input {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 14px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fafbfc;
+  width: 220px;
+}
+
+.license-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- table ---------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.table th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(31, 157, 103, 0.12);
+  color: var(--ok);
+}
+
+.pill.off {
+  background: rgba(107, 118, 131, 0.14);
+  color: var(--muted);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn.ghost:hover {
+  background: #f0f2f6;
+}
+
+/* ---------- dialog ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 26, 35, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog {
+  width: 400px;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 18px 48px rgba(20, 26, 35, 0.22);
+}
+
+.dialog-title {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field input {
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/*
+ * 產線會注入這條規則來停用所有動畫與轉場（見系列 Day 08）。
+ * 這裡先留一個 hook，讓 demo 自己就能示範「關掉動畫前後的差別」。
+ */
+.no-motion *,
+.no-motion *::before,
+.no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}

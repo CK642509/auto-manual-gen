@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# 產物：每次跑產線都會重生，不進版控
+example/output/*
+!example/output/.gitkeep
+
+# 錄影檔太大，走 release assets（Day 27）
+*.webm
+*.mp4
