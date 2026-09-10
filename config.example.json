@@ -1,0 +1,26 @@
+{
+  "app": {
+    "mode": "electron",
+    "electron": {
+      "projectDir": "apps/demo-stream-app",
+      "buildBeforeLaunch": true
+    },
+    "web": {
+      "url": "http://localhost:5173"
+    }
+  },
+  "viewport": {
+    "width": 1600,
+    "height": 900
+  },
+  "paths": {
+    "manifest": "manifest",
+    "docs": "docs",
+    "screenshots": "screenshots",
+    "output": "output",
+    "template": "templates/reference.docx"
+  },
+  "image": {
+    "width": 1200
+  }
+}

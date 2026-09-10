@@ -1,4 +1,4 @@
-# manual-gen
+# auto-manual
 
 > 改完 UI，跑一個指令，使用手冊就更新完畢。
 
@@ -66,27 +66,49 @@ localStorage.clear()                    // 復原
 
 ## 目錄結構
 
+repo 根目錄**本身就是一本手冊專案**：`manifest/` 是唯一的人為真相來源，
+`runner/` 讀它、驅動 App、產出 `screenshots/`，再與 `docs/` 的正文合流成 `output/`。
+
 ```
-manual-gen/
-├─ apps/demo-stream-app/   # 靶：AI 影像串流監控台，Electron + Vue 3，同一份也能純 Web 跑
-│  └─ TESTID.md            #   命名規範 —— 同時給人看與給 agent 看
-├─ packages/
-│  ├─ manual-schema/       # manifest 的 JSON Schema，獨立套件
-│  ├─ manual-runner/       # 核心：drivers / actions / capture / overlay / video / probe
-│  └─ manual-cli/          # init / probe / run / validate / build
-├─ example/                # 一本完整的手冊，讀者的起點
+auto-manual/
+├─ manifest/               # 章節、步驟、標註 —— 唯一的人為真相來源
+│  ├─ schema.json          #   manifest 的 JSON Schema
+│  └─ demo-zhHant.yaml
+├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
+│  ├─ 10-overview.md
+│  └─ 20-setting.md
+├─ fixtures/               # 固定假資料，讓畫面每次都長一樣
+├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
+├─ templates/              # reference.docx，排版樣式與內容分離
+├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
+├─ screenshots/            # 產線拍出來的圖（含標註）
+├─ output/                 # 最終的 manual.docx / manual.pdf
 ├─ agent/                  # 給 AI agent 的上下文（UI-MAP / STYLE / QUIRKS / few-shot）
-├─ fixtures/diff-pairs/    # 已知答案的圖對，檢驗 AI 差異判讀
-└─ plugin/                 # Claude Code plugin
+│  └─ diff-pairs/          #   已知答案的圖對，檢驗 AI 差異判讀
+├─ plugin/                 # Claude Code plugin
+└─ apps/demo-stream-app/   # 靶：範例 App，Electron + Vue 3，同一份也能純 Web 跑
+   └─ TESTID.md            #   命名規範 —— 同時給人看與給 agent 看
 ```
 
+命名約定是這條產線的接合處，不另外維護索引檔：
+
+```
+manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
+```
+
+`order` 用 10 的倍數編號，中間留空間插入章節。
+
 三個目錄是這個 repo 真正的差異化資產：**`agent/`**（給 AI 的上下文）、
-**`example/`**（一本完整的手冊）、**`fixtures/diff-pairs/`**（可驗證的判讀樣本）。
+**根目錄那本手冊本身**（manifest + docs + 產物）、**`agent/diff-pairs/`**（可驗證的判讀樣本）。
 工具本身反而是最容易被取代的部分。
+
+> **`apps/` 與其餘目錄實務上應該是兩個 repo。** 產品有產品的版控節奏，產線是另一套工具，
+> 硬綁在一起只會互相牽制。這裡放在同一個 repo 純粹是為了方便展示 ——
+> clone 一次就同時拿到靶跟打靶的工具。
 
 ## 現況
 
-🚧 骨架階段。只有 `apps/demo-stream-app` 可以跑，`packages/` 與其餘目錄尚未實作。
+🚧 骨架階段。只有 `apps/demo-stream-app` 可以跑，`runner/` 與其餘目錄尚未實作。
 
 ## 授權
 

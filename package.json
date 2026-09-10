@@ -1,11 +1,10 @@
 {
-  "name": "manual-gen",
+  "name": "auto-manual",
   "version": "0.0.0",
   "private": true,
   "description": "用 Playwright + AI Agent 打造使用手冊產線",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "demo": "npm run dev -w demo-stream-app",

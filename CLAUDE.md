@@ -20,13 +20,15 @@ npm run demo:build      # 只 build，產物在 apps/demo-stream-app/dist/
 
 Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev server，沒有就載 `dist/index.html`。**產線（Playwright）一律走後者** —— 手冊要拍的是打包後的樣子，所以驅動 Electron 前必須先 build。
 
-尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`packages/*` 目前只有 README 與 `.gitkeep`，`agent/`、`example/`、`plugin/`、`fixtures/` 只有 `.gitkeep`。
+尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/`、`manifest/`、`docs/`、`agent/`、`plugin/` 目前只有 README 與 `.gitkeep`。
 
 ## 這個 repo 是什麼
 
 用 Playwright + AI Agent 打造的使用手冊產線：驅動 App → 截圖 → 畫框標號 → 遮蔽機敏資訊 → 合併正文 → 產出 Word/PDF。
 
-**現況是骨架階段。** 只有 `apps/demo-stream-app` 可以跑，`packages/` 與其餘目錄尚未實作 —— 新增檔案前先確認它屬於下面「架構的三個主軸」的哪一塊。
+**現況是骨架階段。** 只有 `apps/demo-stream-app` 可以跑，`runner/` 與其餘目錄尚未實作 —— 新增檔案前先確認它屬於下面「架構的三個主軸」的哪一塊。
+
+**repo 根目錄本身就是一本手冊專案**（`manifest/` + `docs/` + `fixtures/` + `templates/` + `config.json`），不是一個 monorepo；`apps/demo-stream-app` 是被拍的靶，實務上應該是另一個 repo，放在這裡只是為了方便展示。
 
 ## 架構的三個主軸
 
@@ -37,10 +39,9 @@ Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev 
 判準：*AI 的輸出會不會被凍結成可審查的產物，或被決定性機制驗證？* 不會的話就不該讓 AI 做。
 
 具體對應：
-- `packages/manual-runner/` —— 純執行者，讀 manifest 驅動 App，**不做任何判斷**
-- `packages/manual-schema/` —— manifest 刻意**不提供條件判斷、迴圈、變數**。一旦圖靈完備就無法 review，而「產出可被人審查」是選宣告式的全部理由。表達不了的操作走逃生門 `action: custom` 指向一支小 `.ts`，逃生門的使用數量要進 lint 報告
-- `packages/manual-cli/` —— `probe` / `run` / `validate` 三個指令合起來就是 agent 的自我驗證迴圈
-- `agent/` —— 給 AI 的上下文（UI-MAP / STYLE / QUIRKS / few-shot）
+- `runner/` —— 純執行者，讀 manifest 驅動 App，**不做任何判斷**。`cli.ts` 的 `probe` / `run` / `validate` 三個指令合起來就是 agent 的自我驗證迴圈
+- `manifest/schema.json` —— manifest 刻意**不提供條件判斷、迴圈、變數**。一旦圖靈完備就無法 review，而「產出可被人審查」是選宣告式的全部理由。表達不了的操作走逃生門 `action: custom` 指向一支小 `.ts`，逃生門的使用數量要進 lint 報告
+- `agent/` —— 給 AI 的上下文（UI-MAP / STYLE / QUIRKS / few-shot），以及 `diff-pairs/` 這組已知答案的圖對
 
 ### 2. 對 agent 友善的介面
 
@@ -51,7 +52,7 @@ CLI 與 runner 的輸出要**結構化**，錯誤訊息要說「你可以怎麼�
 ### 3. 靠命名約定串接，不用索引檔
 
 ```
-chapters[].id  ↔  example/docs/{order}-{id}.md  ↔  screenshots/{name}.png
+manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 ```
 
 `order` 用 10 的倍數編號，中間留空間插入章節。
@@ -125,6 +126,6 @@ localStorage.setItem('settings', '{"face":{"enabled":true,"threshold":75}}')
 ## 其他慣例
 
 - **`.gitattributes` 強制 LF**（開發在 Windows、CI 跑 Linux 容器），圖片 / 影片 / docx / pdf 一律 binary。
-- 產物不進版控：`example/output/*`、`*.webm`、`*.mp4`（錄影走 release assets）。
+- 產物不進版控：`output/*`、`config.json`（一人一份，只有 `config.example.json` 進版控）、`*.webm`、`*.mp4`（錄影走 release assets）。
 - Commit 用 `feat:` / `fix:` 前綴 + 中文標題，body 用條列說明改了什麼與為什麼。
 - `agent/` 這個目錄本身會過期，要跟著 code 一起改 —— 它在 code review 檢查清單上。

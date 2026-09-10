@@ -2,9 +2,12 @@ node_modules/
 dist/
 *.log
 
+# 一人一份的環境設定，只有 config.example.json 進版控
+config.json
+
 # 產物：每次跑產線都會重生，不進版控
-example/output/*
-!example/output/.gitkeep
+output/*
+!output/.gitkeep
 
 # 錄影檔太大，走 release assets（Day 27）
 *.webm
