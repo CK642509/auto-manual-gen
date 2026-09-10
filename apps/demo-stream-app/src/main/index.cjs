@@ -12,7 +12,7 @@ function createWindow() {
     height: 900,
 
     // useContentSize 讓 1600×900 指的是「內容區」而不是含邊框的視窗。
-    // 截圖尺寸要跨平台一致，這行是必要的（見系列 Day 08）。
+    // 截圖尺寸要跨平台一致，這行是必要的。
     useContentSize: true,
 
     show: false,
@@ -34,7 +34,7 @@ function createWindow() {
   const indexHtml = path.join(__dirname, '../../dist/index.html')
 
   // 前置檢查：錯誤訊息要在「還看得懂」的階段爆出來，
-  // 而不是讓 Playwright 對著一片白畫面等 30 秒 timeout（見系列 Day 05）。
+  // 而不是讓 Playwright 對著一片白畫面等 30 秒 timeout。
   if (!fs.existsSync(indexHtml)) {
     throw new Error(`找不到 ${indexHtml} —— 請先執行 npm run build -w demo-stream-app`)
   }

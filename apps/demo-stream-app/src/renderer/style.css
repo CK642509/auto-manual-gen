@@ -2,11 +2,20 @@
   --bg: #f4f6f9;
   --panel: #ffffff;
   --line: #e2e6ee;
+  --line-soft: #eef1f6;
   --text: #1c2430;
   --muted: #6b7683;
   --accent: #2f6df6;
+  --accent-soft: #eaf0fe;
   --warn: #e5544b;
   --ok: #1f9d67;
+  --off: #94a0ae;
+
+  /* 版面尺寸：Electron 視窗鎖 1600×900 內容區，這些數字是照著那個框算的 */
+  --topbar-h: 56px;
+  --side-w: 320px;
+  --gap: 14px;
+
   font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui, sans-serif;
 }
 
@@ -18,127 +27,474 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-}
-
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
 .mono {
   font-family: ui-monospace, 'Cascadia Mono', monospace;
-  font-size: 13px;
 }
 
-/* ---------- topbar ---------- */
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= topbar ================= */
 .topbar {
-  height: 56px;
-  padding: 0 24px;
+  height: var(--topbar-h);
+  flex: none;
+  padding: 0 20px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 28px;
 }
 
 .brand {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   margin: 0;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  align-self: stretch;
+}
+
+.tab {
+  font: inherit;
+  font-size: 14px;
+  padding: 0 18px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tab.active {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
 }
 
 .topbar-right {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.runtime {
+.tag {
   font-size: 12px;
-  color: var(--muted);
   padding: 3px 10px;
-  border: 1px solid var(--line);
   border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
 }
 
-/* ---------- layout ---------- */
-.content {
+.tag.muted {
+  background: #f0f2f6;
+  color: var(--muted);
+}
+
+.tag.warn {
+  background: rgba(229, 84, 75, 0.1);
+  color: var(--warn);
+}
+
+/* ================= 即時監控頁 ================= */
+.monitor-page {
   flex: 1;
-  padding: 24px;
+  min-height: 0;
+  display: flex;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+.monitor-left {
+  width: var(--side-w);
+  flex: none;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--gap);
+  min-height: 0;
 }
 
-.cards {
+/* ---------- 統計卡 ---------- */
+.stats {
+  flex: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
-.card-label {
-  font-size: 13px;
-  color: var(--muted);
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.card-value {
-  font-size: 28px;
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value {
+  font-size: 20px;
   font-weight: 600;
   line-height: 1;
 }
 
-.card-value.warn {
+.stat-value.warn {
   color: var(--warn);
 }
 
-/* ---------- panel ---------- */
-.panel {
+/* ---------- 攝影機清單 ---------- */
+.camera-panel {
+  flex: 1;
+  min-height: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 20px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.panel-head {
+.camera-panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 10px;
 }
 
 .panel-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0;
 }
 
-.meta {
+.camera-search {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fafbfc;
+}
+
+.camera-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/*
+ * 清單刻意超過面板高度，需要捲動才看得完。
+ * 產線要拍完整清單就得先捲動，而捲動之後 boundingBox 會失效必須重取。
+ */
+.camera-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-soft);
+}
+
+.camera-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  user-select: none;
+}
+
+.camera-row:hover {
+  background: #f7f9fc;
+}
+
+.camera-row.used {
+  background: var(--accent-soft);
+}
+
+.camera-state {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  font-size: 0;
+  color: transparent;
+}
+
+.camera-state.stopped {
+  background: var(--off);
+}
+
+.camera-state.offline {
+  background: var(--warn);
+}
+
+.camera-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.camera-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.camera-zone {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.camera-edit {
+  flex: none;
+  font: inherit;
+  font-size: 14px;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.camera-edit:hover {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.camera-count,
+.camera-empty {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.camera-empty {
+  flex: 1;
+  padding-top: 20px;
+  text-align: center;
+}
+
+/* ---------- 骨架屏 ---------- */
+.camera-skeleton {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-bar {
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #eef1f6 25%, #e3e8f0 37%, #eef1f6 63%);
+  background-size: 400% 100%;
+  animation: skeleton 1.4s ease infinite;
+}
+
+.skeleton-bar.w-60 {
+  width: 60%;
+}
+
+.skeleton-bar.w-40 {
+  width: 40%;
+}
+
+@keyframes skeleton {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* ================= 即時畫面 ================= */
+.grid-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.grid-toolbar {
+  flex: none;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-label {
   font-size: 12px;
   color: var(--muted);
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.segmented-item {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  border: none;
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.segmented-item:last-child {
+  border-right: none;
+}
+
+.segmented-item.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.select {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+/* ---------- 格子 ---------- */
+.grid-view {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.grid-view.cols-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.grid-view.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.grid-view.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.grid-view.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.cell {
+  position: relative;
+  min-height: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #10161f;
+}
+
+.cell.empty {
+  background: var(--panel);
+  border-style: dashed;
+  border-color: #cfd6e2;
+}
+
+.cell-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--off);
+}
+
+.cell-empty-index {
+  font-size: 11px;
   font-family: ui-monospace, 'Cascadia Mono', monospace;
 }
 
-/* ---------- live view ----------
-   刻意做成「每次截圖都不一樣」：飄移的偵測框 + 跳動的時間戳 + 變動的偵測數。
-   產線要靠停用動畫、注入固定時間、攔截 API 才拍得穩（Day 07 / Day 08）。 */
-.viewport {
-  position: relative;
-  height: 260px;
-  border-radius: 8px;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 30% 20%, #33445c 0%, #1b2432 55%, #121822 100%);
+.cell-empty-text {
+  font-size: 12px;
+}
+
+/*
+ * 即時畫面：刻意做成「每次截圖都不一樣」——
+ * 飄移的偵測框 + 每秒跳動的時間戳 + 每 1.2 秒重算的偵測數。
+ * 產線要靠停用動畫、凍結時間、攔截資料才拍得穩。
+ */
+.cell-view {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 30% 20%, #33445c 0%, #1b2432 55%, #121822 100%);
 }
 
 .scanlines {
@@ -162,7 +518,7 @@ body {
 
 .det span {
   position: absolute;
-  top: -20px;
+  top: -18px;
   left: -2px;
   background: #52e08a;
   color: #10231a;
@@ -173,19 +529,20 @@ body {
   white-space: nowrap;
 }
 
+/* 位置與位移都用百分比，換版面（1×1 ↔ 4×4）時偵測框會跟著縮放 */
 .det-a {
-  width: 84px;
-  height: 128px;
-  top: 74px;
-  left: 132px;
+  width: 13%;
+  height: 42%;
+  top: 26%;
+  left: 20%;
   animation: drift-a 7s ease-in-out infinite alternate;
 }
 
 .det-b {
-  width: 140px;
-  height: 76px;
-  top: 128px;
-  left: 420px;
+  width: 22%;
+  height: 26%;
+  top: 48%;
+  left: 58%;
   border-color: #f0b429;
   animation: drift-b 9s ease-in-out infinite alternate;
 }
@@ -197,34 +554,63 @@ body {
 
 @keyframes drift-a {
   to {
-    transform: translate(48px, -16px);
+    transform: translate(58%, -22%);
   }
 }
 
 @keyframes drift-b {
   to {
-    transform: translate(-62px, 10px);
+    transform: translate(-42%, 14%);
   }
 }
 
-.viewport-bar {
+.cell-offline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #7b8898;
+  background: rgba(8, 11, 16, 0.55);
+}
+
+.cell-bar {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 8px 14px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: rgba(10, 14, 20, 0.6);
+  gap: 10px;
+  background: rgba(10, 14, 20, 0.62);
   color: #cfd6e0;
   font-family: ui-monospace, 'Cascadia Mono', monospace;
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cell-bar-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.cell-bar-fps {
+  margin-left: auto;
+}
+
+.cell.compact .cell-bar {
+  padding: 4px 8px;
+  font-size: 10px;
+  gap: 7px;
 }
 
 .live-dot {
-  width: 8px;
-  height: 8px;
+  flex: none;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--warn);
   animation: blink 1.4s ease-in-out infinite;
@@ -236,76 +622,174 @@ body {
   }
 }
 
-/* ---------- license ---------- */
-.license {
+.cell-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  font-size: 12px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(10, 14, 20, 0.6);
+  color: #e7ecf3;
+  cursor: pointer;
+}
+
+.cell-remove:hover {
+  background: var(--warn);
+  color: #fff;
+}
+
+/* ================= 系統設定頁 ================= */
+.settings-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--gap) 0;
+}
+
+.settings-section,
+.settings-actions {
+  width: 900px;
+  max-width: calc(100% - 2 * var(--gap));
+  margin: 0 auto var(--gap);
+}
+
+.settings-section {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 16px 20px;
+  padding: 6px 20px 14px;
+}
+
+.section-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.license-label {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.license-input {
-  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  gap: 10px;
   font-size: 14px;
-  padding: 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fafbfc;
-  width: 220px;
-}
-
-.license-hint {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* ---------- table ---------- */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.table th,
-.table td {
-  text-align: left;
-  padding: 11px 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-.table th {
-  font-size: 12px;
   font-weight: 600;
-  color: var(--muted);
+  margin: 0;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--line-soft);
 }
 
-.table tbody tr:last-child td {
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.setting-row:last-child {
   border-bottom: none;
 }
 
-.pill {
-  display: inline-block;
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(31, 157, 103, 0.12);
-  color: var(--ok);
+.setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.pill.off {
-  background: rgba(107, 118, 131, 0.14);
+.setting-label {
+  font-size: 13px;
+}
+
+.setting-desc {
+  font-size: 11px;
   color: var(--muted);
 }
 
-/* ---------- buttons ---------- */
+/* 子設定是條件渲染的，總開關關掉時整塊從 DOM 消失 */
+.setting-sub {
+  margin: 0 0 4px 16px;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent-soft);
+}
+
+.setting-sub .setting-row {
+  padding: 10px 0;
+}
+
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setting-unit {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.input-num,
+.input-text {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fafbfc;
+  color: var(--text);
+}
+
+.input-num {
+  width: 76px;
+}
+
+.input-text {
+  width: 220px;
+}
+
+.license-block {
+  padding-top: 2px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- 開關 ---------- */
+.switch {
+  flex: none;
+  width: 42px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #e6eaf1;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s ease;
+}
+
+.switch.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 26, 35, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.switch.on .switch-knob {
+  transform: translateX(18px);
+}
+
+/* ================= 按鈕 ================= */
 .btn {
   font: inherit;
   font-size: 13px;
@@ -315,6 +799,12 @@ body {
   background: var(--panel);
   color: var(--text);
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn.sm {
+  font-size: 12px;
+  padding: 6px 12px;
 }
 
 .btn.primary {
@@ -323,11 +813,28 @@ body {
   color: #fff;
 }
 
+.btn.danger {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: #fff;
+}
+
+.btn.danger.ghost {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--warn);
+}
+
 .btn.ghost:hover {
   background: #f0f2f6;
 }
 
-/* ---------- dialog ---------- */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ================= 對話框 ================= */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -338,36 +845,76 @@ body {
   z-index: 100;
 }
 
+/* 第二層對話框疊在第一層之上，backdrop 再壓一次 */
+.backdrop-nested {
+  background: rgba(20, 26, 35, 0.34);
+  z-index: 110;
+}
+
 .dialog {
-  width: 400px;
+  width: 460px;
   background: var(--panel);
   border-radius: 12px;
-  padding: 24px;
+  padding: 22px 24px;
   box-shadow: 0 18px 48px rgba(20, 26, 35, 0.22);
 }
 
+.dialog-sm {
+  width: 380px;
+}
+
 .dialog-title {
-  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
   font-size: 16px;
   font-weight: 600;
+}
+
+.dialog-message {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 14px;
-  font-size: 13px;
+  margin-bottom: 13px;
+  font-size: 12px;
   color: var(--muted);
 }
 
-.field input {
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.field input,
+.field select {
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text);
-  padding: 8px 12px;
+  padding: 8px 11px;
   border: 1px solid var(--line);
   border-radius: 6px;
+  background: var(--panel);
+}
+
+.field-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0 2px;
+  font-size: 13px;
 }
 
 .dialog-actions {
@@ -377,8 +924,52 @@ body {
   margin-top: 20px;
 }
 
+.dialog-actions.spread {
+  justify-content: space-between;
+}
+
+.dialog-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
+/* ================= Toast ================= */
 /*
- * 產線會注入這條規則來停用所有動畫與轉場（見系列 Day 08）。
+ * 刻意做成 3 秒後自動消失（時間常數在 composables/useToast.ts）。
+ * 對截圖產線來說，這是典型的「等太久就拍到空氣」情境，
+ * 逼腳本必須等語意訊號而不是固定延遲。
+ */
+.toast-host {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(28, 36, 48, 0.94);
+  color: #f2f5f9;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(20, 26, 35, 0.24);
+  animation: toast-in 0.18s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/*
+ * 產線會注入這條規則來停用所有動畫與轉場。
  * 這裡先留一個 hook，讓 demo 自己就能示範「關掉動畫前後的差別」。
  */
 .no-motion *,
