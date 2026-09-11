@@ -4,7 +4,7 @@
 
 | 目錄 | 職責 |
 |---|---|
-| `drivers/` | 啟動待測物。`electron.ts` / `web.ts` 兩個實作，共用 `AppDriver` 介面 |
+| `drivers/` | 啟動待測物。`electron.ts` / `web.ts` 兩個實作，共用 `AppDriver` 介面（**已實作**） |
 | `actions/` | manifest 的動詞集：`click` / `dblclick` / `fill` / `waitFor` / `screenshot` / `setStorage` / `scroll` / `hover` / `dismiss` |
 | `capture/` | 截圖構圖與裁切：整頁 / 元素 / `clip` 區域，以及印刷解析度的推算 |
 | `overlay/` | **注入 DOM 疊層**。畫框、編號圓標與碰撞避讓、遮蔽、假游標 —— 四件事共用同一套渲染 |
@@ -21,6 +21,18 @@
 | `auto-manual run --chapter <id>` | 執行（可局部重跑） | 人 + agent |
 | `auto-manual validate` | schema + selector 存在性 + 編號一致性 | 人 + agent + CI |
 | `auto-manual build` | 合併正文與截圖，pandoc 產 docx / pdf | 人 + CI |
+
+## `AppDriver`
+
+`drivers/types.ts` 定義四個方法：`launch` / `setStorage` / `resize` / `close`。
+上層只認得這個介面，底下是 Electron 還是 Web 不需要關心；`createDriver(config)` 依 `app.mode` 挑實作。
+
+`setStorage` 的**呼叫時機會改變它的行為**：
+
+- **launch 之前**：排隊，啟動時用 `addInitScript` 在第一次 navigation 之前注入。App 讀 localStorage 時值已經在了，不會先閃一次預設狀態 —— 這是首選路徑。
+- **launch 之後**：註冊 init script 再 reload。Electron 只有這條路（`firstWindow()` 拿到手時已經 navigate 過了）。
+
+煙霧測試：`npm run driver:smoke -- --mode electron|web`，產物在 `output/smoke-<mode>.png`。
 
 ## 設計約束
 

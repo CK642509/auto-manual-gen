@@ -16,17 +16,23 @@ npm install
 npm run demo            # Web 模式，vite dev server，http://localhost:5173（strictPort）
 npm run demo:electron   # Electron 模式（先 vite build 再 electron .）
 npm run demo:build      # 只 build，產物在 apps/demo-stream-app/dist/
+
+npm run typecheck       # tsc --noEmit，只涵蓋 runner/
+npm run driver:smoke               # driver 煙霧測試，走 config 的 app.mode
+npm run driver:smoke -- --mode web # 指定形態（web 模式要先開著 npm run demo）
 ```
 
 Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev server，沒有就載 `dist/index.html`。**產線（Playwright）一律走後者** —— 手冊要拍的是打包後的樣子，所以驅動 Electron 前必須先 build。
 
-尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/`、`manifest/`、`docs/`、`agent/`、`plugin/` 目前只有 README 與 `.gitkeep`。
+尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/` 目前只有 `drivers/` 與 `config.ts` 有實作，`manifest/`、`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
+
+runner 的程式碼是 ESM TypeScript，用 `tsx` 直接跑，不編譯（根目錄 `package.json` 的 `"type": "module"` 是為此而設）。
 
 ## 這個 repo 是什麼
 
 用 Playwright + AI Agent 打造的使用手冊產線：驅動 App → 截圖 → 畫框標號 → 遮蔽機敏資訊 → 合併正文 → 產出 Word/PDF。
 
-**現況是骨架階段。** 只有 `apps/demo-stream-app` 可以跑，`runner/` 與其餘目錄尚未實作 —— 新增檔案前先確認它屬於下面「架構的三個主軸」的哪一塊。
+**現況是骨架階段。** `apps/demo-stream-app` 可以跑，`runner/drivers/` 的 `AppDriver`（Electron / Web 兩個實作）已經接上 Playwright，其餘目錄尚未實作 —— 新增檔案前先確認它屬於下面「架構的三個主軸」的哪一塊。
 
 **repo 根目錄本身就是一本手冊專案**（`manifest/` + `docs/` + `fixtures/` + `templates/` + `config.json`），不是一個 monorepo；`apps/demo-stream-app` 是被拍的靶，實務上應該是另一個 repo，放在這裡只是為了方便展示。
 
