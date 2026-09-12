@@ -2,6 +2,7 @@
   "name": "auto-manual",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "用 Playwright + AI Agent 打造使用手冊產線",
   "workspaces": [
     "apps/*"
@@ -9,9 +10,17 @@
   "scripts": {
     "demo": "npm run dev -w demo-stream-app",
     "demo:electron": "npm run electron -w demo-stream-app",
-    "demo:build": "npm run build -w demo-stream-app"
+    "demo:build": "npm run build -w demo-stream-app",
+    "typecheck": "tsc --noEmit",
+    "driver:smoke": "tsx runner/drivers/smoke.ts"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "playwright": "^1.63.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
   }
 }
