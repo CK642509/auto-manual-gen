@@ -22,6 +22,32 @@ npm run demo            # Web 模式，開 http://localhost:5173
 npm run demo:electron   # Electron 模式（會先 build 再啟動）
 ```
 
+跑產線本身：
+
+```bash
+npm run manual                             # 整本 manifest，產出 screenshots/
+npm run manual -- --chapter layout-preset  # 只重跑一章
+npm run manual -- --mode web               # 指定形態（web 要另開終端機跑 npm run demo）
+```
+
+形態預設讀 `config.json` 的 `app.mode`（範本是 `electron`，會自己先 build，不必另外開服務）。
+
+### 重現 Day 15 那次失敗
+
+文章裡的失敗是真的跑出來的，這個分支把修之前與修之後都留著：
+
+```bash
+# 取回還沒修的那一版（tag 指著修正前的最後一個 commit）
+git checkout day15-before-fix -- manifest/30-layout-preset.yaml
+npm run manual -- --mode web                          # 跑到第 3 章 layout-preset 失敗
+
+git checkout HEAD -- manifest/30-layout-preset.yaml   # 修回來
+npm run manual -- --chapter layout-preset --mode web  # 只重跑那一章
+```
+
+執行紀錄逐字存在 `tools/logs/`，文章裡的終端機圖是 `npm run terminal:shot` 從它渲染的。
+**截圖不會跟文章裡像素完全相同** —— 字型隨作業系統而異，那是 Day 23 談 CI 時要處理的題目。
+
 兩個指令跑的是**同一份前端**。畫面右上角會顯示當前模式，這是 `AppDriver`
 一套腳本服務兩種產品形態的基礎。
 
@@ -73,7 +99,8 @@ repo 根目錄**本身就是一本手冊專案**：`manifest/` 是唯一的人�
 auto-manual/
 ├─ manifest/               # 章節、步驟、標註 —— 唯一的人為真相來源
 │  ├─ schema.json          #   manifest 的 JSON Schema
-│  └─ demo-zhHant.yaml
+│  ├─ manual.yaml          #   profile + bootstrap（每一章開始前都要準備好的環境）
+│  └─ 20-live-monitor.yaml #   一章一個檔案，{order}-{id}.yaml
 ├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
 │  ├─ 10-overview.md
 │  └─ 20-setting.md
@@ -81,8 +108,11 @@ auto-manual/
 ├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
 ├─ templates/              # reference.docx，排版樣式與內容分離
 ├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
-├─ screenshots/            # 產線拍出來的圖（含標註）
+│  └─ run.ts               #   讀 manifest 驅動 App，一章一次開機（npm run manual）
+├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染）
+├─ screenshots/            # 產線拍出來的圖（含標註），不進版控
 ├─ output/                 # 最終的 manual.docx / manual.pdf
+│  └─ failures/{id}/       #   失敗現場：整頁截圖 + DOM dump，只給除錯用
 ├─ agent/                  # 給 AI agent 的上下文（UI-MAP / STYLE / QUIRKS / few-shot）
 │  └─ diff-pairs/          #   已知答案的圖對，檢驗 AI 差異判讀
 ├─ plugin/                 # Claude Code plugin
@@ -108,7 +138,8 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 
 ## 現況
 
-🚧 骨架階段。只有 `apps/demo-stream-app` 可以跑，`runner/` 與其餘目錄尚未實作。
+🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts`）可以跑，
+`manifest/` 有一本四章的示範手冊；`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
 
 ## 授權
 

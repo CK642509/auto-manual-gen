@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=./schema.json
+id: overview
+title: 介面總覽
+order: 10
+
+steps:
+  # 等骨架屏消失、清單出現才開始（Day 10）
+  - { action: waitFor, testid: camera-list-skeleton, state: detached }
+  - { action: waitFor, testid: camera-list }
+
+  - action: screenshot
+    name: overview-01
+    clip: { testid: app-root }
+    annotate:
+      - { key: stats, testid: overview-stats, legend: 系統概況 }
+      - { key: cameras, testid: camera-panel, legend: 攝影機清單 }
+      - { key: grid, testid: grid-panel, legend: 即時畫面區 }

@@ -1,0 +1,8 @@
+$ npm run manual -- --chapter layout-preset --mode web
+
+manifest: demo-stream-app v1.2.0  只跑 1 章（--chapter layout-preset）  [web]
+
+▶ [1/1] layout-preset  儲存版面設定
+✔ [1/1] layout-preset  10 steps / 2 shots  1.5s
+
+完成 1 章，總共 2.2s -> screenshots/

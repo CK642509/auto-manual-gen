@@ -17,14 +17,19 @@ npm run demo            # Web 模式，vite dev server，http://localhost:5173�
 npm run demo:electron   # Electron 模式（先 vite build 再 electron .）
 npm run demo:build      # 只 build，產物在 apps/demo-stream-app/dist/
 
-npm run typecheck       # tsc --noEmit，只涵蓋 runner/
+npm run manual                                 # 跑整本 manifest，產出 screenshots/
+npm run manual -- --chapter <id> --mode web    # 局部重跑；--mode 蓋過 config 的 app.mode
+
+npm run typecheck       # tsc --noEmit，涵蓋 runner/ 與 tools/
 npm run driver:smoke               # driver 煙霧測試，走 config 的 app.mode
 npm run driver:smoke -- --mode web # 指定形態（web 模式要先開著 npm run demo）
 ```
 
 Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev server，沒有就載 `dist/index.html`。**產線（Playwright）一律走後者** —— 手冊要拍的是打包後的樣子，所以驅動 Electron 前必須先 build。
 
-尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/` 目前只有 `drivers/` 與 `config.ts` 有實作，`manifest/`、`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
+尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/` 目前有 `drivers/`、`config.ts` 與 `run.ts`（動詞集還擠在 `run.ts` 裡，之後要拆進 `actions/` / `capture/` / `overlay/`），`manifest/` 有一本四章的示範手冊，`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
+
+產物一律不進版控：`screenshots/`（手冊要用的圖，扁平放置、檔名前綴就是章節 id）與 `output/`（最終文件，`failures/{id}/` 放失敗現場）都在 `.gitignore` 裡。
 
 runner 的程式碼是 ESM TypeScript，用 `tsx` 直接跑，不編譯（根目錄 `package.json` 的 `"type": "module"` 是為此而設）。
 

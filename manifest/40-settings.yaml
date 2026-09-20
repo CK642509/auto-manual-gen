@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=./schema.json
+id: settings
+title: 影像分析設定
+order: 40
+
+steps:
+  - { action: click, testid: nav-tab_settings }
+  - { action: waitFor, testid: settings-page }
+
+  # 人臉辨識預設是關的，子設定整塊不在 DOM 裡
+  - { action: click, testid: settings-face-enabled }
+  - { action: waitFor, testid: settings-face-sub }
+
+  - action: screenshot
+    name: settings-01
+    clip: { testid: settings-section_analysis, padding: 12 }
+    annotate:
+      - { key: motion, testid: settings-motion-enabled, legend: 動作偵測開關 }
+      - { key: face, testid: settings-face-enabled, legend: 人臉辨識開關 }
+      - { key: threshold, testid: settings-face-threshold, legend: 相似度門檻 }

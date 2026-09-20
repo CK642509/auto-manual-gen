@@ -12,6 +12,8 @@
     "demo:electron": "npm run electron -w demo-stream-app",
     "demo:build": "npm run build -w demo-stream-app",
     "typecheck": "tsc --noEmit",
+    "manual": "tsx runner/run.ts",
+    "terminal:shot": "tsx tools/terminal-shot.ts",
     "driver:smoke": "tsx runner/drivers/smoke.ts"
   },
   "engines": {
@@ -21,6 +23,7 @@
     "@types/node": "^24.13.4",
     "playwright": "^1.63.0",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "yaml": "^2.9.1"
   }
 }

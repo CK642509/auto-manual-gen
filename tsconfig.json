@@ -3,13 +3,14 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
+    // DOM 是給 page.evaluate 的回呼用的 —— 那些程式碼在瀏覽器裡執行（疊層、testid 盤點）
+    "lib": ["ES2022", "DOM"],
     "strict": true,
     "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["runner/**/*.ts"],
+  "include": ["runner/**/*.ts", "tools/**/*.ts"],
   "exclude": ["node_modules", "apps"]
 }

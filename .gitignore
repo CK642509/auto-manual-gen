@@ -8,6 +8,8 @@ config.json
 # 產物：每次跑產線都會重生，不進版控
 output/*
 !output/.gitkeep
+screenshots/*
+!screenshots/.gitkeep
 
 # 錄影檔太大，走 release assets（Day 27）
 *.webm
