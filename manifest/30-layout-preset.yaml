@@ -10,14 +10,15 @@ steps:
   # 先填一格，版面才不是空的
   - { action: dblclick, testid: camera-row_gate-a }
 
-  - { action: click, testid: grid-layout_4x4 }
-
+  # grid-cell-fps_{n} 在 3×3 以上會被精簡掉，這張圖只能在 2×2 拍
   - action: screenshot
     name: layout-preset-01
     clip: { testid: grid-view, padding: 12 }
     annotate:
       - { key: cell, testid: grid-cell_1, legend: 已配置的格子 }
       - { key: fps, testid: grid-cell-fps_1, legend: 即時影格率 }
+
+  - { action: click, testid: grid-layout_4x4 }
 
   - { action: click, testid: grid-preset-save }
   - { action: waitFor, testid: preset-dialog }
