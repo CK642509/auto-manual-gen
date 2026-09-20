@@ -12,6 +12,8 @@
     "demo:electron": "npm run electron -w demo-stream-app",
     "demo:build": "npm run build -w demo-stream-app",
     "typecheck": "tsc --noEmit",
+    "manual": "tsx runner/run.ts",
+    "terminal:shot": "tsx tools/terminal-shot.ts",
     "driver:smoke": "tsx runner/drivers/smoke.ts"
   },
   "engines": {
