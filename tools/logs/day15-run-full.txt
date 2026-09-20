@@ -1,0 +1,19 @@
+$ npm run manual -- --mode web
+
+manifest: demo-stream-app v1.2.0  共 4 章  [web]
+
+▶ [1/4] overview  介面總覽
+✔ [1/4] overview  3 steps / 1 shot  1.3s
+
+▶ [2/4] live-monitor  即時監控畫面
+✔ [2/4] live-monitor  6 steps / 2 shots  1.7s
+
+▶ [3/4] layout-preset  儲存版面設定
+✖ [3/4] layout-preset  step 4 失敗：{"action":"screenshot","name":"layout-preset-01"}
+找不到 annotate[1].testid「grid-cell-fps_1」
+  目前畫面上有 150 個 testid，其中 grid-cell* 開頭的有：
+    grid-cell_1 / grid-cell-view_1 / grid-cell-det_1a / grid-cell-det_1b / grid-cell-name_1 / grid-cell-timestamp_1 / grid-cell-remove_1 / grid-cell_2
+  失敗當下的畫面：output/failures/layout-preset/failure.png
+  失敗當下的 DOM：output/failures/layout-preset/failure.html
+  修好之後只要重跑這一章：npm run manual -- --chapter layout-preset
+  尚未執行的章節：settings
