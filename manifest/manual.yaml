@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=./schema.json
+#
+# 整本手冊的 profile 與 bootstrap。章節各自一個檔案：{order}-{id}.yaml。
+profile: demo-stream-app
+version: 'v1.2.0'
+locale: zh-Hant
+
+bootstrap:
+  viewport: { width: 1600, height: 900, deviceScaleFactor: 2 }
+  # 狀態注入在第一次 navigation 之前發生（Day 09）
+  storage:
+    locale: zh-Hant
+    role: operator
+    layout: '{"mode":"2x2","cells":[null,null,null,null]}'
+  clock: '2025-09-01T09:00:00'
+  disableAnimations: true

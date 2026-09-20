@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=./schema.json
+id: live-monitor
+title: 即時監控畫面
+order: 20
+
+steps:
+  # 等骨架屏消失、清單出現才開始（Day 10）
+  - { action: waitFor, testid: camera-list-skeleton, state: detached }
+  - { action: waitFor, testid: camera-list }
+
+  - action: screenshot
+    name: live-monitor-01
+    clip: { testid: monitor-page, padding: 12 }
+    annotate:
+      - { key: search, testid: camera-search, legend: 攝影機搜尋框 }
+      - { key: layout, testid: grid-layout-group, legend: 版面切換 }
+      - { key: save, testid: grid-preset-save, legend: 儲存目前版面 }
+
+  - { action: fill, testid: camera-search, text: lobby }
+  - { action: dblclick, testid: camera-row_lobby-01 }
+
+  - action: screenshot
+    name: live-monitor-02
+    clip: { testid: grid-panel, padding: 12 }
+    annotate:
+      - { key: cell, testid: grid-cell_1, legend: 剛填入的格子 }
+      - { key: remove, testid: grid-cell-remove_1, legend: 清除此格 }

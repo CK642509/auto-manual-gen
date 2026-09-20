@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=./schema.json
+id: layout-preset
+title: 儲存版面設定
+order: 30
+
+steps:
+  - { action: waitFor, testid: camera-list-skeleton, state: detached }
+  - { action: waitFor, testid: camera-list }
+
+  # 先填一格，版面才不是空的
+  - { action: dblclick, testid: camera-row_gate-a }
+
+  - { action: click, testid: grid-layout_4x4 }
+
+  - action: screenshot
+    name: layout-preset-01
+    clip: { testid: grid-view, padding: 12 }
+    annotate:
+      - { key: cell, testid: grid-cell_1, legend: 已配置的格子 }
+      - { key: fps, testid: grid-cell-fps_1, legend: 即時影格率 }
+
+  - { action: click, testid: grid-preset-save }
+  - { action: waitFor, testid: preset-dialog }
+  - { action: fill, testid: preset-dialog-name, text: 大廳巡檢 }
+
+  - action: screenshot
+    name: layout-preset-02
+    clip: { testid: preset-dialog, padding: 12 }
+    annotate:
+      - { key: summary, testid: preset-dialog-summary, legend: 目前版面摘要 }
+      - { key: name, testid: preset-dialog-name, legend: 版面名稱 }
+      - { key: confirm, testid: preset-dialog-confirm, legend: 儲存 }
+
+  - { action: click, testid: preset-dialog-confirm }
