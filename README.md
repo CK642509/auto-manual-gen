@@ -51,6 +51,32 @@ npm run manual -- --chapter layout-preset --mode web  # 只重跑那一章
 兩個指令跑的是**同一份前端**。畫面右上角會顯示當前模式，這是 `AppDriver`
 一套腳本服務兩種產品形態的基礎。
 
+### 重現 Day 17 那次 AI Agent 加一章
+
+Day 17 讓 agent 讀 `agent/UI-MAP.md`、`agent/QUIRKS.md`、`apps/demo-stream-app/TESTID.md`
+與 `manifest/schema.json`，寫出 `manifest/50-camera-add.yaml`。這個分支把**人工審查前**
+與**微調後**兩個版本都留著，對應文章裡的兩張 diff：
+
+```bash
+npm install
+npm run demo   # 另開一個終端機，Web 模式跑起來
+
+# agent 的第一版：只示範填顯示名稱
+git checkout day17-agent-v1 -- manifest/50-camera-add.yaml
+npm run validate -- --chapter camera-add
+npm run manual -- --chapter camera-add --mode web   # 產出 camera-add-01 / -02
+
+# 人工審查後微調：補 RTSP 位址、修正 legend、示範按下確認鍵
+git checkout day17 -- manifest/50-camera-add.yaml
+npm run manual -- --chapter camera-add --mode web   # 多出 camera-add-03
+```
+
+`probe` 與 `validate` 也是 Day 17 補上的，探勘畫面可以直接試：
+
+```bash
+npm run probe -- --mode web --after click:camera-add
+```
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -138,8 +164,9 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 
 ## 現況
 
-🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts`）可以跑，
-`manifest/` 有一本四章的示範手冊；`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
+🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
+可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`
+與兩章 few-shot 範例；`docs/`、`plugin/` 還只有 README 與 `.gitkeep`。
 
 ## 授權
 
