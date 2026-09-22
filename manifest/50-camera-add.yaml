@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=./schema.json
+id: camera-add
+title: 新增攝影機
+order: 50
+
+steps:
+  - { action: waitFor, testid: camera-list-skeleton, state: detached }
+  - { action: waitFor, testid: camera-list }
+
+  - { action: click, testid: camera-add }
+  - { action: waitFor, testid: camera-dialog }
+
+  - action: screenshot
+    name: camera-add-01
+    clip: { testid: camera-dialog, padding: 12 }
+    annotate:
+      - { key: name, testid: camera-dialog-name, legend: 顯示名稱 }
+      - { key: zone, testid: camera-dialog-zone, legend: 安裝位置 }
+      - { key: source, testid: camera-dialog-source, legend: 串流位址 }
+      - { key: enabled, testid: camera-dialog-enabled, legend: 啟用推論 }
+
+  - { action: fill, testid: camera-dialog-name, text: 大門西側 }
+
+  - action: screenshot
+    name: camera-add-02
+    clip: { testid: camera-dialog, padding: 12 }
+    annotate:
+      - { key: confirm, testid: camera-dialog-confirm, legend: 確認新增 }
