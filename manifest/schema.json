@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "auto-manual chapter",
+  "description": "一章手冊的設定檔（{order}-{id}.yaml）。人與 agent 共用同一份 schema：IDE 用它做即時提示，runner/validate.ts 用它做落地檢查。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "order", "steps"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "章節 id，必須跟檔名 {order}-{id}.yaml 的 {id} 一致，也是 screenshots/{id}-NN.png 的檔名前綴"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "order": {
+      "type": "integer",
+      "multipleOf": 10,
+      "minimum": 10,
+      "description": "10 的倍數，數字之間留空間方便之後插章"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/step" }
+    }
+  },
+  "definitions": {
+    "step": {
+      "type": "object",
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["click", "dblclick", "fill", "waitFor", "wait", "scroll", "hover", "dismiss", "screenshot"]
+        },
+        "testid": { "type": "string" },
+        "text": { "type": "string" },
+        "state": { "type": "string", "enum": ["visible", "detached"] },
+        "name": { "type": "string" },
+        "clip": {
+          "type": "object",
+          "required": ["testid"],
+          "properties": {
+            "testid": { "type": "string" },
+            "padding": { "type": "number" }
+          }
+        },
+        "annotate": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "testid", "legend"],
+            "properties": {
+              "key": { "type": "string" },
+              "testid": { "type": "string" },
+              "legend": { "type": "string" }
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "action": { "const": "fill" } } },
+          "then": { "required": ["testid", "text"] }
+        },
+        {
+          "if": { "properties": { "action": { "const": "screenshot" } } },
+          "then": { "required": ["name"] }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": { "enum": ["click", "dblclick", "waitFor", "scroll", "hover", "dismiss"] }
+            }
+          },
+          "then": { "required": ["testid"] }
+        }
+      ]
+    }
+  }
+}
