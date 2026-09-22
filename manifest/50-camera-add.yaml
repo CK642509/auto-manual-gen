@@ -16,13 +16,21 @@ steps:
     annotate:
       - { key: name, testid: camera-dialog-name, legend: 顯示名稱 }
       - { key: zone, testid: camera-dialog-zone, legend: 安裝位置 }
-      - { key: source, testid: camera-dialog-source, legend: 串流位址 }
+      - { key: source, testid: camera-dialog-source, legend: RTSP 位址 }
       - { key: enabled, testid: camera-dialog-enabled, legend: 啟用推論 }
 
   - { action: fill, testid: camera-dialog-name, text: 大門西側 }
+  - { action: fill, testid: camera-dialog-source, text: 'rtsp://10.0.4.115/live' }
 
   - action: screenshot
     name: camera-add-02
     clip: { testid: camera-dialog, padding: 12 }
     annotate:
       - { key: confirm, testid: camera-dialog-confirm, legend: 確認新增 }
+
+  - { action: click, testid: camera-dialog-confirm }
+  - { action: waitFor, testid: toast }
+
+  - action: screenshot
+    name: camera-add-03
+    clip: { testid: toast-host, padding: 12 }
