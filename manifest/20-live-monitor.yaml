@@ -24,4 +24,4 @@ steps:
     clip: { testid: grid-panel, padding: 12 }
     annotate:
       - { key: cell, testid: grid-cell_1, legend: 剛填入的格子 }
-      - { key: remove, testid: grid-cell-remove_1, legend: 移除此格 }
+      - { key: remove, testid: grid-cell-remove_1, badge: left, legend: 移除此格 }

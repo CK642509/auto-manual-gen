@@ -64,11 +64,11 @@ async function locate(page: Page, testid: string, where = 'testid') {
 }
 
 async function annotate(page: Page, items: Annotation[]) {
-  const boxes: (Rect & { label: string })[] = []
+  const boxes: (Rect & { label: string; badge?: Annotation['badge'] })[] = []
   for (const [i, item] of items.entries()) {
     const box = await (await locate(page, item.testid, `annotate[${i}].testid`)).boundingBox()
     if (!box) throw new Error(`annotate[${i}].testid「${item.testid}」存在但不可見`)
-    boxes.push({ ...box, label: String(i + 1) })
+    boxes.push({ ...box, label: String(i + 1), badge: item.badge })
   }
 
   await page.evaluate(
@@ -85,11 +85,18 @@ async function annotate(page: Page, items: Annotation[]) {
           border:3px solid #ff3b30; border-radius:6px;
           box-shadow:0 0 0 2px rgba(255,255,255,0.9);
         `
+        // 預設掛在左上角；badge: left 改掛左邊框的垂直中點，給上方有標籤文字的欄位用。
+        // left 模式下目標太小（例如 ✕ 按鈕）時整顆移到框外，不然圓標會把目標本身蓋掉
+        const small = t.width < R * 4
+        const [left, top] =
+          t.badge === 'left'
+            ? [small ? t.x - PAD - R * 2 - 4 : t.x - PAD - R, t.y + t.height / 2 - R]
+            : [t.x - PAD - R, t.y - PAD - R]
         const badge = document.createElement('div')
         badge.textContent = t.label
         badge.style.cssText = `
           position:absolute;
-          left:${t.x - PAD - R}px; top:${t.y - PAD - R}px;
+          left:${left}px; top:${top}px;
           width:${R * 2}px; height:${R * 2}px; border-radius:50%;
           background:#ff3b30; color:#fff;
           display:flex; align-items:center; justify-content:center;

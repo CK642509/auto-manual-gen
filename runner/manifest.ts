@@ -12,7 +12,7 @@ export const ACTIONS = ['click', 'dblclick', 'fill', 'waitFor', 'wait', 'scroll'
 export type Action = (typeof ACTIONS)[number]
 
 export type Rect = { x: number; y: number; width: number; height: number }
-export type Annotation = { key: string; testid: string; legend: string }
+export type Annotation = { key: string; testid: string; legend: string; badge?: 'corner' | 'left' }
 export type Step = {
   action: Action
   testid?: string
