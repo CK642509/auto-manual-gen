@@ -26,7 +26,7 @@ steps:
     name: camera-add-02
     clip: { testid: camera-dialog, padding: 12 }
     annotate:
-      - { key: confirm, testid: camera-dialog-confirm, legend: 確認新增 }
+      - { key: confirm, testid: camera-dialog-confirm, legend: 建立 }
 
   - { action: click, testid: camera-dialog-confirm }
   - { action: waitFor, testid: toast }

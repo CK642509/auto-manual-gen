@@ -14,7 +14,7 @@ steps:
     annotate:
       - { key: search, testid: camera-search, legend: 攝影機搜尋框 }
       - { key: layout, testid: grid-layout-group, legend: 版面切換 }
-      - { key: save, testid: grid-preset-save, legend: 儲存目前版面 }
+      - { key: save, testid: grid-preset-save, legend: 儲存版面 }
 
   - { action: fill, testid: camera-search, text: lobby }
   - { action: dblclick, testid: camera-row_lobby-01 }
@@ -24,4 +24,4 @@ steps:
     clip: { testid: grid-panel, padding: 12 }
     annotate:
       - { key: cell, testid: grid-cell_1, legend: 剛填入的格子 }
-      - { key: remove, testid: grid-cell-remove_1, legend: 清除此格 }
+      - { key: remove, testid: grid-cell-remove_1, legend: 移除此格 }
