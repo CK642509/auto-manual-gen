@@ -165,8 +165,9 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 ## 現況
 
 🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
-可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`
-與兩章 few-shot 範例；`docs/`、`plugin/` 還只有 README 與 `.gitkeep`。
+可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
+與兩章 manifest few-shot 範例，`docs/` 有兩章人工審核過的正文範例；`plugin/` 還只有 `.gitkeep`。
+正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，合併正文的步驟尚未實作。
 
 ## 授權
 
