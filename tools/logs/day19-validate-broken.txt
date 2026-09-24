@@ -1,0 +1,7 @@
+manifest 驗證通過（1 章）。
+需要人工確認（1 則）：
+  - docs/50-camera-add.md: 「快速匯出」在 App 文案、manifest、章節標題與示範資料裡都找不到，請人工確認畫面上真的有這個名稱
+正文驗證失敗（3 個問題）：
+  - docs/50-camera-add.md: 引用了不存在的 {{legend.save}}，本章可用的有：name / zone / source / enabled / confirm
+  - docs/50-camera-add.md: 漏放截圖 {{screenshot:camera-add-03}}，manifest 裡的每一張都要出現一次
+  - docs/50-camera-add.md: 第 1 個保護區跟 HEAD 不一致（開頭：「> 重要：攝影機建立並啟用推論後，會持續拍攝並分析畫面中的人…」）。保護區只能由人修改，請用 git diff HEAD -- docs/50-camera-add.md 確認差異，把原文還原回去

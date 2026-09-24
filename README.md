@@ -77,6 +77,24 @@ npm run manual -- --chapter camera-add --mode web   # 多出 camera-add-03
 npm run probe -- --mode web --after click:camera-add
 ```
 
+### 重現 Day 19 的正文驗收
+
+`validate` 在 manifest 之後會接著驗正文：legend 與截圖引用、人工保護區，以及「」裡的名稱有沒有出處。
+`tools/samples/day19-camera-add-broken.md` 是一份**故意改壞**的新增攝影機正文，
+四種問題各放一個：改寫了保護區、引用本章沒有的 legend、漏放一張截圖、寫了 App 沒有的「快速匯出」。
+
+```bash
+npm run validate -- --chapter camera-add   # 審過的版本：通過
+
+cp tools/samples/day19-camera-add-broken.md docs/50-camera-add.md
+npm run validate -- --chapter camera-add   # 三個錯誤 + 一則需要人工確認
+
+git checkout -- docs/50-camera-add.md      # 復原
+```
+
+執行紀錄存在 `tools/logs/day19-validate-broken.txt`。保護區預設跟 `HEAD` 比，
+要跟其他版本比就加 `--base <ref>`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -167,7 +185,7 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
 可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
 與兩章 manifest few-shot 範例，`docs/` 有兩章人工審核過的正文範例；`plugin/` 還只有 `.gitkeep`。
-正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，合併正文的步驟尚未實作。
+正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區；合併正文的步驟尚未實作。
 
 ## 授權
 
