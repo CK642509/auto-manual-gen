@@ -110,6 +110,18 @@ npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 output/m
 封面的版本號取自 `manifest/manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
 `templates/reference.docx` 是 pandoc 預設樣式檔改出來的，改了哪些樣式寫在 `tools/style-reference-docx.ps1`。
 
+### 重現 Day 21 的 HTML 版與不靠 Office 的 PDF
+
+同一份 `output/manual.md` 改交給 pandoc 產 HTML，樣式來自 `templates/manual.css`（HTML 版的 reference.docx）。
+`--embed-resources` 會把截圖內嵌進去，產出單一檔案，可以直接放上網或寄出去。
+
+```bash
+npm run build -- --to html          # output/manual.html
+npm run build -- --to html --pdf    # 再用 Playwright 的 Chromium 印成 output/manual-html.pdf
+```
+
+第二條路不需要 Word 或 LibreOffice，Linux 上也能跑；代價是 PDF 的目錄沒有頁碼、封面也會印上頁碼。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -200,7 +212,7 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
 可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
 與兩章 manifest few-shot 範例，`docs/` 五章都有正文；`plugin/` 還只有 `.gitkeep`。
-正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區，`build` 把它們合併成 Word / PDF。
+正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區，`build` 把它們合併成 Word / HTML / PDF。
 
 ## 授權
 

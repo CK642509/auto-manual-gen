@@ -10,7 +10,7 @@
 | `overlay/` | **注入 DOM 疊層**。畫框、編號圓標與碰撞避讓、遮蔽、假游標 —— 四件事共用同一套渲染 |
 | `video/` | 錄影與字幕：`recordVideo`、`slowMo`、從 step 時間軸產 `.srt` |
 | `run.ts` | **已實作**。讀 manifest，一章一次開機，產出 `screenshots/{name}.png`；失敗時把現場寫進 `output/failures/{id}/` |
-| `build.ts` | **已實作**。合併 `docs/` 與截圖成 `output/manual.md`，pandoc 套 `templates/reference.docx` 產 docx；`--pdf` 再交給 `word-export.ps1` 更新目錄並轉 PDF |
+| `build.ts` | **已實作**。合併 `docs/` 與截圖成 `output/manual.md`，pandoc 套 `templates/reference.docx` 產 docx；`--pdf` 再交給 `word-export.ps1` 更新目錄並轉 PDF。`--to html` 改產單檔 HTML（`templates/manual.css`），搭配 `--pdf` 由 Chromium 印成 PDF |
 | `probe.ts` | 探勘：印出當前畫面所有可見且具 testid 的元件 + 文字 + boundingBox。**餵給 agent 的關鍵素材** |
 | `cli.ts` | 指令入口，見下表 |
 

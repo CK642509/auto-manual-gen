@@ -22,6 +22,7 @@ npm run manual -- --chapter <id> --mode web    # 局部重跑；--mode 蓋過 co
 
 npm run build                     # 合併 docs/ 與截圖，pandoc 產出 output/manual.docx（需要 pandoc）
 npm run build -- --pdf            # 再用 Word COM 更新目錄並轉 PDF（只能在裝有 Word 的 Windows）
+npm run build -- --to html --pdf  # 單檔 HTML（templates/manual.css）+ Playwright 印出的 PDF，不需要 Office
 
 npm run typecheck       # tsc --noEmit，涵蓋 runner/ 與 tools/
 npm run driver:smoke               # driver 煙霧測試，走 config 的 app.mode

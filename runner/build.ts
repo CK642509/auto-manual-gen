@@ -1,20 +1,24 @@
 /**
- * 合併正文與截圖，交給 pandoc 產出 Word（Day 20）。
+ * 合併正文與截圖，交給 pandoc 產出 Word（Day 20）或 HTML（Day 21）。
  *
- *   npm run build            # output/manual.md → output/manual.docx
- *   npm run build -- --pdf   # 再用 Word 更新目錄頁碼、轉出 output/manual.pdf（只能在裝有 Word 的 Windows）
+ *   npm run build                      # output/manual.md → output/manual.docx
+ *   npm run build -- --pdf             # 再用 Word 更新目錄頁碼、轉出 output/manual.pdf（只能在裝有 Word 的 Windows）
+ *   npm run build -- --to html         # output/manual.html，圖片內嵌成單一檔案，可以直接放上網
+ *   npm run build -- --to html --pdf   # 再用 Playwright 的 Chromium 印成 output/manual-html.pdf（不需要 Office）
  *
  * 分兩段：
  *
  * 1. 合併：把 `docs/{order}-{id}.md` 依 manifest 的 order 串起來，展開 `{{legend.*}}` 與 `{{screenshot:*}}`，
  *    寫成一份 `output/manual.md`。這一段是純文字處理，產物可以直接打開來看、拿來 diff。
- * 2. 轉換：pandoc 只負責把 Markdown 的結構轉成 Word 的結構，字型、顏色、頁碼全部來自 `templates/reference.docx`。
+ * 2. 轉換：pandoc 只負責結構，長相來自外部檔案 —— Word 看 `templates/reference.docx`，HTML 看 `templates/manual.css`。
  *
  * 合併前會先跑一次跟 `validate` 相同的正文檢查 —— 引用壞掉的正文不該被排成一份看起來很正式的文件。
  */
 import { execFileSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { chromium } from 'playwright'
 import { loadConfig, repoRoot } from './config.js'
 import { loadManual } from './boot.js'
 import { docFileName, docsDir, validateDoc } from './docs.js'
@@ -23,9 +27,17 @@ import { loadChapters, rel, type Chapter } from './manifest.js'
 const config = loadConfig()
 const wantPdf = process.argv.includes('--pdf')
 
+const toArg = process.argv.indexOf('--to')
+const target = toArg === -1 ? 'docx' : process.argv[toArg + 1]
+if (target !== 'docx' && target !== 'html') {
+  console.error(`不支援的輸出格式「${target}」，可用的有：docx / html`)
+  process.exit(1)
+}
+
 const SHOTS = path.join(repoRoot, config.paths.screenshots)
 const OUTPUT = path.join(repoRoot, config.paths.output)
 const TEMPLATE = path.join(repoRoot, config.paths.template)
+const CSS = path.join(repoRoot, 'templates', 'manual.css')
 
 /** A4 扣掉左右各 2.5 cm 的版心寬，跟 reference.docx 的版面設定對齊。圖片再寬也不超過這個數字。 */
 const PAGE_WIDTH_IN = 6.3
@@ -128,11 +140,15 @@ const mdFile = path.join(OUTPUT, 'manual.md')
 fs.writeFileSync(mdFile, merged)
 console.log(`合併 ${chapters.length} 章 -> ${rel(mdFile)}`)
 
-// 3. pandoc：Markdown 結構 → Word 結構，樣式全部來自 reference.docx
-const docxFile = path.join(OUTPUT, 'manual.docx')
+// 3. pandoc：Markdown 結構 → Word / HTML 結構，樣式全部來自外部檔案（reference.docx / manual.css）
+const outFile = path.join(OUTPUT, `manual.${target}`)
+const formatArgs =
+  target === 'docx'
+    ? [`--reference-doc=${rel(TEMPLATE)}`]
+    : ['--standalone', '--embed-resources', `--css=${rel(CSS)}`]
 const pandoc = spawnSync(
   'pandoc',
-  [rel(mdFile), '-o', rel(docxFile), `--reference-doc=${rel(TEMPLATE)}`, '--toc', '--toc-depth=1', '--resource-path=.'],
+  [rel(mdFile), '-o', rel(outFile), ...formatArgs, '--toc', '--toc-depth=1', '--resource-path=.'],
   { cwd: repoRoot, stdio: 'inherit' },
 )
 if (pandoc.error) {
@@ -140,20 +156,40 @@ if (pandoc.error) {
   process.exit(1)
 }
 if (pandoc.status !== 0) process.exit(pandoc.status ?? 1)
-console.log(`pandoc -> ${rel(docxFile)}`)
+console.log(`pandoc -> ${rel(outFile)}`)
 
-// 4. Word：更新目錄頁碼、存回 docx、轉出 PDF
-if (wantPdf) {
+// 4. PDF：docx 交給 Word，HTML 交給 Playwright 的 Chromium
+if (wantPdf && target === 'docx') {
   if (process.platform !== 'win32') {
-    console.error('--pdf 走的是 Word COM，只能在裝有 Word 的 Windows 上跑。其他環境的做法見 Day 21 / Day 23。')
+    console.error('docx 轉 PDF 走的是 Word COM，只能在裝有 Word 的 Windows 上跑。其他環境改用 --to html --pdf。')
     process.exit(1)
   }
   const pdfFile = path.join(OUTPUT, 'manual.pdf')
   const word = spawnSync(
     'powershell',
-    ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(repoRoot, 'runner', 'word-export.ps1'), docxFile, pdfFile],
+    ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(repoRoot, 'runner', 'word-export.ps1'), outFile, pdfFile],
     { stdio: 'inherit' },
   )
   if (word.status !== 0) process.exit(word.status ?? 1)
   console.log(`Word -> ${rel(pdfFile)}（目錄頁碼已更新）`)
+}
+
+if (wantPdf && target === 'html') {
+  const pdfFile = path.join(OUTPUT, 'manual-html.pdf')
+  const browser = await chromium.launch()
+  const page = await browser.newPage()
+  await page.goto(pathToFileURL(outFile).href)
+  await page.pdf({
+    path: pdfFile,
+    format: 'A4',
+    margin: { top: '2.5cm', bottom: '2.5cm', left: '2.5cm', right: '2.5cm' },
+    printBackground: true,
+    outline: true, // 標題轉成 PDF 書籤
+    tagged: true,
+    displayHeaderFooter: true,
+    headerTemplate: '<span></span>',
+    footerTemplate: '<div style="width:100%;text-align:center;font-size:9pt;color:#6e6e6e"><span class="pageNumber"></span></div>',
+  })
+  await browser.close()
+  console.log(`Chromium -> ${rel(pdfFile)}`)
 }
