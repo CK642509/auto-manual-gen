@@ -10,6 +10,7 @@
 | `overlay/` | **注入 DOM 疊層**。畫框、編號圓標與碰撞避讓、遮蔽、假游標 —— 四件事共用同一套渲染 |
 | `video/` | 錄影與字幕：`recordVideo`、`slowMo`、從 step 時間軸產 `.srt` |
 | `run.ts` | **已實作**。讀 manifest，一章一次開機，產出 `screenshots/{name}.png`；失敗時把現場寫進 `output/failures/{id}/` |
+| `build.ts` | **已實作**。合併 `docs/` 與截圖成 `output/manual.md`，pandoc 套 `templates/reference.docx` 產 docx；`--pdf` 再交給 `word-export.ps1` 更新目錄並轉 PDF |
 | `probe.ts` | 探勘：印出當前畫面所有可見且具 testid 的元件 + 文字 + boundingBox。**餵給 agent 的關鍵素材** |
 | `cli.ts` | 指令入口，見下表 |
 
@@ -21,7 +22,7 @@
 | `auto-manual probe` | 列出當前畫面可見且具 testid 的元件 | **agent** |
 | `auto-manual run --chapter <id>` | 執行（可局部重跑）。目前的實作是 `npm run manual -- --chapter <id>` | 人 + agent |
 | `auto-manual validate` | schema + selector 存在性 + 編號一致性 | 人 + agent + CI |
-| `auto-manual build` | 合併正文與截圖，pandoc 產 docx / pdf | 人 + CI |
+| `auto-manual build` | 合併正文與截圖，pandoc 產 docx / pdf。目前的實作是 `npm run build -- --pdf` | 人 + CI |
 
 ## `AppDriver`
 

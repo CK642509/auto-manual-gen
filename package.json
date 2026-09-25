@@ -15,6 +15,7 @@
     "manual": "tsx runner/run.ts",
     "probe": "tsx runner/probe.ts",
     "validate": "tsx runner/validate.ts",
+    "build": "tsx runner/build.ts",
     "terminal:shot": "tsx tools/terminal-shot.ts",
     "driver:smoke": "tsx runner/drivers/smoke.ts"
   },

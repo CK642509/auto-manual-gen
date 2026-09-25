@@ -95,6 +95,21 @@ git checkout -- docs/50-camera-add.md      # 復原
 執行紀錄存在 `tools/logs/day19-validate-broken.txt`。保護區預設跟 `HEAD` 比，
 要跟其他版本比就加 `--base <ref>`。
 
+### 重現 Day 20 的 Word / PDF 交付
+
+`npm run build` 把 `docs/` 的正文依 manifest 的 order 合併成 `output/manual.md`，
+展開 `{{legend.*}}` 與 `{{screenshot:*}}`（截圖下方自動附上 legend 表格），再交給 pandoc 套
+`templates/reference.docx` 產出 Word。需要先安裝 [pandoc](https://pandoc.org/installing.html)（文章用 3.11）。
+
+```bash
+npm run manual                # 先把九張截圖拍好
+npm run build                 # output/manual.md + output/manual.docx
+npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 output/manual.pdf（需要 Windows + Word）
+```
+
+封面的版本號取自 `manifest/manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
+`templates/reference.docx` 是 pandoc 預設樣式檔改出來的，改了哪些樣式寫在 `tools/style-reference-docx.ps1`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -147,10 +162,10 @@ auto-manual/
 │  └─ 20-live-monitor.yaml #   一章一個檔案，{order}-{id}.yaml
 ├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
 │  ├─ 10-overview.md
-│  └─ 20-setting.md
+│  └─ 20-live-monitor.md
 ├─ fixtures/               # 固定假資料，讓畫面每次都長一樣
 ├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
-├─ templates/              # reference.docx，排版樣式與內容分離
+├─ templates/              # reference.docx，排版樣式與內容分離（pandoc 只讀它的樣式，不讀內容）
 ├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
 │  └─ run.ts               #   讀 manifest 驅動 App，一章一次開機（npm run manual）
 ├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染）
@@ -184,8 +199,8 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 
 🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
 可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
-與兩章 manifest few-shot 範例，`docs/` 有兩章人工審核過的正文範例；`plugin/` 還只有 `.gitkeep`。
-正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區；合併正文的步驟尚未實作。
+與兩章 manifest few-shot 範例，`docs/` 五章都有正文；`plugin/` 還只有 `.gitkeep`。
+正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區，`build` 把它們合併成 Word / PDF。
 
 ## 授權
 

@@ -13,6 +13,8 @@ import { manifestDir, tid } from './manifest.js'
 
 export type Manual = {
   profile: string
+  /** 封面上的手冊名稱（Day 20） */
+  title: string
   version: string
   bootstrap: {
     viewport: AppConfig['viewport']
