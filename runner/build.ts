@@ -115,7 +115,8 @@ const metadata = [
   `title: '${manual.title}'`,
   `subtitle: '版本 ${manual.version}'`,
   `date: '${git.date}（${git.commit}${git.dirty ? '，含未提交的變更' : ''}）'`,
-  'lang: zh-TW',
+  // 不寫 zh-TW：pandoc 只內建 zh-Hant / zh-Hans 的翻譯檔，zh-TW 會找不到而印出一整排警告
+  'lang: zh-Hant-TW',
   "toc-title: '目錄'",
   '---',
 ]
