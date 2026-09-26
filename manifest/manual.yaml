@@ -2,6 +2,7 @@
 #
 # 整本手冊的 profile 與 bootstrap。章節各自一個檔案：{order}-{id}.yaml。
 profile: demo-stream-app
+title: DemoStreamApp 使用手冊
 version: 'v1.2.0'
 locale: zh-Hant
 

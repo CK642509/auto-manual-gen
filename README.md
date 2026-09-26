@@ -51,6 +51,77 @@ npm run manual -- --chapter layout-preset --mode web  # 只重跑那一章
 兩個指令跑的是**同一份前端**。畫面右上角會顯示當前模式，這是 `AppDriver`
 一套腳本服務兩種產品形態的基礎。
 
+### 重現 Day 17 那次 AI Agent 加一章
+
+Day 17 讓 agent 讀 `agent/UI-MAP.md`、`agent/QUIRKS.md`、`apps/demo-stream-app/TESTID.md`
+與 `manifest/schema.json`，寫出 `manifest/50-camera-add.yaml`。這個分支把**人工審查前**
+與**微調後**兩個版本都留著，對應文章裡的兩張 diff：
+
+```bash
+npm install
+npm run demo   # 另開一個終端機，Web 模式跑起來
+
+# agent 的第一版：只示範填顯示名稱
+git checkout day17-agent-v1 -- manifest/50-camera-add.yaml
+npm run validate -- --chapter camera-add
+npm run manual -- --chapter camera-add --mode web   # 產出 camera-add-01 / -02
+
+# 人工審查後微調：補 RTSP 位址、修正 legend、示範按下確認鍵
+git checkout day17 -- manifest/50-camera-add.yaml
+npm run manual -- --chapter camera-add --mode web   # 多出 camera-add-03
+```
+
+`probe` 與 `validate` 也是 Day 17 補上的，探勘畫面可以直接試：
+
+```bash
+npm run probe -- --mode web --after click:camera-add
+```
+
+### 重現 Day 19 的正文驗收
+
+`validate` 在 manifest 之後會接著驗正文：legend 與截圖引用、人工保護區，以及「」裡的名稱有沒有出處。
+`tools/samples/day19-camera-add-broken.md` 是一份**故意改壞**的新增攝影機正文，
+四種問題各放一個：改寫了保護區、引用本章沒有的 legend、漏放一張截圖、寫了 App 沒有的「快速匯出」。
+
+```bash
+npm run validate -- --chapter camera-add   # 審過的版本：通過
+
+cp tools/samples/day19-camera-add-broken.md docs/50-camera-add.md
+npm run validate -- --chapter camera-add   # 三個錯誤 + 一則需要人工確認
+
+git checkout -- docs/50-camera-add.md      # 復原
+```
+
+執行紀錄存在 `tools/logs/day19-validate-broken.txt`。保護區預設跟 `HEAD` 比，
+要跟其他版本比就加 `--base <ref>`。
+
+### 重現 Day 20 的 Word / PDF 交付
+
+`npm run build` 把 `docs/` 的正文依 manifest 的 order 合併成 `output/manual.md`，
+展開 `{{legend.*}}` 與 `{{screenshot:*}}`（截圖下方自動附上 legend 表格），再交給 pandoc 套
+`templates/reference.docx` 產出 Word。需要先安裝 [pandoc](https://pandoc.org/installing.html)（文章用 3.11）。
+
+```bash
+npm run manual                # 先把九張截圖拍好
+npm run build                 # output/manual.md + output/manual.docx
+npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 output/manual.pdf（需要 Windows + Word）
+```
+
+封面的版本號取自 `manifest/manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
+`templates/reference.docx` 是 pandoc 預設樣式檔改出來的，改了哪些樣式寫在 `tools/style-reference-docx.ps1`。
+
+### 重現 Day 21 的 HTML 版與不靠 Office 的 PDF
+
+同一份 `output/manual.md` 改交給 pandoc 產 HTML，樣式來自 `templates/manual.css`（HTML 版的 reference.docx）。
+`--embed-resources` 會把截圖內嵌進去，產出單一檔案，可以直接放上網或寄出去。
+
+```bash
+npm run build -- --to html          # output/manual.html
+npm run build -- --to html --pdf    # 再用 Playwright 的 Chromium 印成 output/manual-html.pdf
+```
+
+第二條路不需要 Word 或 LibreOffice，Linux 上也能跑；代價是 PDF 的目錄沒有頁碼、封面也會印上頁碼。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -103,10 +174,10 @@ auto-manual/
 │  └─ 20-live-monitor.yaml #   一章一個檔案，{order}-{id}.yaml
 ├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
 │  ├─ 10-overview.md
-│  └─ 20-setting.md
+│  └─ 20-live-monitor.md
 ├─ fixtures/               # 固定假資料，讓畫面每次都長一樣
 ├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
-├─ templates/              # reference.docx，排版樣式與內容分離
+├─ templates/              # reference.docx，排版樣式與內容分離（pandoc 只讀它的樣式，不讀內容）
 ├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
 │  └─ run.ts               #   讀 manifest 驅動 App，一章一次開機（npm run manual）
 ├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染）
@@ -138,8 +209,10 @@ manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
 
 ## 現況
 
-🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts`）可以跑，
-`manifest/` 有一本四章的示範手冊；`docs/`、`agent/`、`plugin/` 還只有 README 與 `.gitkeep`。
+🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
+可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
+與兩章 manifest few-shot 範例，`docs/` 五章都有正文；`plugin/` 還只有 `.gitkeep`。
+正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區，`build` 把它們合併成 Word / HTML / PDF。
 
 ## 授權
 

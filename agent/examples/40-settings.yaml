@@ -18,6 +18,3 @@ steps:
       - { key: motion, testid: settings-motion-enabled, legend: 動作偵測開關 }
       - { key: face, testid: settings-face-enabled, legend: 人臉辨識開關 }
       - { key: threshold, testid: settings-face-threshold, legend: 相似度門檻 }
-
-  - { action: click, testid: settings-save }
-  - { action: waitFor, testid: toast }
