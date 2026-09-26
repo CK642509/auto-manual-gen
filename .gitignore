@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+
+# 一人一份的環境設定，只有 config.example.json 進版控
+config.json
+
+# 產物：每次跑產線都會重生，不進版控
+output/*
+!output/.gitkeep
+screenshots/*
+!screenshots/.gitkeep
+
+# 錄影檔太大，走 release assets（Day 27）
+*.webm
+*.mp4
