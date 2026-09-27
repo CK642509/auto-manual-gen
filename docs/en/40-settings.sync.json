@@ -1,0 +1,49 @@
+{
+  "source": "docs/40-settings.md",
+  "blocks": [
+    {
+      "source": "79bc2194",
+      "target": "e5decfca"
+    },
+    {
+      "source": "053dd00b",
+      "target": "0ea47007"
+    },
+    {
+      "source": "60e82ffe",
+      "target": "04e379c6"
+    },
+    {
+      "source": "34ea1f88",
+      "target": "4e9cd0ac"
+    },
+    {
+      "source": "5ba9cdf3",
+      "target": "5ba9cdf3"
+    },
+    {
+      "source": "c1aa399b",
+      "target": "d3b83be9"
+    },
+    {
+      "source": "ba6c2847",
+      "target": "76d70e3f"
+    },
+    {
+      "source": "ac68cb86",
+      "target": "adee1ceb"
+    },
+    {
+      "source": "3737bb57",
+      "target": "27b39ee5"
+    },
+    {
+      "source": "2e776105",
+      "target": "b4c6a8b5"
+    },
+    {
+      "source": "d04d5260",
+      "target": "10b6a31a"
+    }
+  ]
+}

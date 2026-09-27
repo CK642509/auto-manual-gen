@@ -141,6 +141,36 @@ npm run build -- --locale en          # 只出英文版
 
 Electron 模式每次開機都用一個全新的 userData 目錄 —— 否則上一次執行存下的設定會跟到下一次（例如人臉辨識已經是開的，再點一次反而關掉）。
 
+### 重現 Day 23 的翻譯同步
+
+中文正文改了之後，`sync` 找出英文版哪幾段要重翻。正文以空行切段、每段算 hash，
+`docs/en/{order}-{id}.sync.json` 記下「中文段落 hash ↔ 英文段落 hash」，比對靠 hash 不靠位置，
+中間插一段不會讓後面的段落都變成「需要翻譯」。
+
+```bash
+npm run sync -- --locale en                       # 列出每一章：需要翻譯 / 需要確認 / 舊譯文
+npm run sync -- --locale en --accept camera-add   # 翻好、審完之後，記下這一版的段落對照
+```
+
+`--accept` 要求兩邊段落一對一（段落數、截圖、保護區、標題層級都對得上），譯文不能拆段或併段。
+
+文章裡的輸出可以用 `tools/samples/` 的三份檔案重現：中文改了兩段、英文被直接潤飾一段，最後補上翻譯。
+
+```bash
+cp tools/samples/day23-camera-add-zh.md docs/50-camera-add.md
+cp tools/samples/day23-camera-add-en-edited.md docs/en/50-camera-add.md
+npm run sync -- --locale en                        # 需要翻譯 2 段、需要確認 1 段、舊譯文 2 段
+npm run sync -- --locale en --accept camera-add    # 被擋下來：原文 15 段、譯文 14 段
+
+cp tools/samples/day23-camera-add-en-translated.md docs/en/50-camera-add.md
+npm run sync -- --locale en --accept camera-add    # 記下 15 段的對照
+npm run sync -- --locale en                        # 全部同步
+
+git checkout -- docs/                              # 復原
+```
+
+執行紀錄存在 `tools/logs/day23-sync.txt`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
