@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
+import os from 'node:os'
 import path from 'node:path'
 import { _electron, type ElectronApplication, type Page } from 'playwright'
 import { repoRoot, type AppConfig } from '../config.js'
@@ -17,6 +18,7 @@ export class ElectronDriver implements AppDriver {
   #app?: ElectronApplication
   #page?: Page
   #pendingStorage: Record<string, string> = {}
+  #userDataDir?: string
 
   constructor(private readonly config: AppConfig) {}
 
@@ -30,6 +32,10 @@ export class ElectronDriver implements AppDriver {
     if (this.config.app.electron.buildBeforeLaunch) this.#build(projectDir)
     this.#preflight(projectDir)
 
+    // 每次開機都給一個全新的 userData 目錄。Electron 的 localStorage 預設存在使用者目錄裡、跨執行保留，
+    // 上一次執行存下的設定或版面設定會跟到這一次 —— 一章一次開機的前提就是「每章從同一個乾淨狀態開始」。
+    this.#userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'auto-manual-electron-'))
+
     this.#app = await _electron.launch({
       executablePath: this.#resolveElectronBinary(),
       // App 目錄要排在第一個，其餘是往下傳給 Chromium 的旗標。
@@ -38,6 +44,7 @@ export class ElectronDriver implements AppDriver {
         // 不強制固定的話，同一份程式碼在不同系統縮放比例的機器上截出來的尺寸會不一致，
         // 直接影響後面標號座標的計算（Day 11 的 boundingBox 疊層）。
         '--force-device-scale-factor=1',
+        `--user-data-dir=${this.#userDataDir}`,
       ],
       cwd: projectDir,
       // 註：容器環境可能還需要 --no-sandbox 與關掉 GPU 加速的旗標，Day 23 談 CI 時再補。
@@ -77,6 +84,8 @@ export class ElectronDriver implements AppDriver {
     await this.#app?.close()
     this.#app = undefined
     this.#page = undefined
+    if (this.#userDataDir) fs.rmSync(this.#userDataDir, { recursive: true, force: true, maxRetries: 3 })
+    this.#userDataDir = undefined
   }
 
   // --- 內部 ---
