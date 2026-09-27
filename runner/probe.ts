@@ -5,6 +5,7 @@
  *   npm run probe -- --mode web
  *   npm run probe -- --mode web --after click:camera-add
  *   npm run probe -- --mode web --after dblclick:camera-row_lobby-01,click:nav-tab_settings
+ *   npm run probe -- --mode web --locale en    # 看英文版畫面上的文字（寫英文正文前先探勘）
  *
  * `--after` 是一串用逗號分隔的 `action:testid`，依序執行再探勘 ——
  * 條件渲染的對話框、設定子項在首頁探勘不到，必須先做幾個操作才看得見。
@@ -20,6 +21,7 @@ const arg = (name: string) => {
 
 const mode = arg('mode') as 'electron' | 'web' | undefined
 const after = arg('after')
+const locale = arg('locale')
 
 type Probed = { testid: string; text: string; box: { x: number; y: number; width: number; height: number } }
 
@@ -58,7 +60,7 @@ async function probe(page: Page): Promise<{ visible: Probed[]; total: number }> 
   })
 }
 
-const { driver, page } = await boot(mode)
+const { driver, page } = await boot(mode, true, locale)
 
 try {
   if (after) await runAfter(page, after)

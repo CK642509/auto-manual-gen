@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 id: camera-add
-title: 新增攝影機
+title: { zh-Hant: 新增攝影機, en: Adding a Camera }
 order: 50
 
 steps:
@@ -14,19 +14,19 @@ steps:
     name: camera-add-01
     clip: { testid: camera-dialog, padding: 12 }
     annotate:
-      - { key: name, testid: camera-dialog-name, badge: left, legend: 顯示名稱 }
-      - { key: zone, testid: camera-dialog-zone, badge: left, legend: 安裝位置 }
-      - { key: source, testid: camera-dialog-source, badge: left, legend: RTSP 位址 }
-      - { key: enabled, testid: camera-dialog-enabled, legend: 啟用推論 }
+      - { key: name, testid: camera-dialog-name, badge: left, legend: { zh-Hant: 顯示名稱, en: Display Name } }
+      - { key: zone, testid: camera-dialog-zone, badge: left, legend: { zh-Hant: 安裝位置, en: Installation Zone } }
+      - { key: source, testid: camera-dialog-source, badge: left, legend: { zh-Hant: RTSP 位址, en: RTSP URL } }
+      - { key: enabled, testid: camera-dialog-enabled, legend: { zh-Hant: 啟用推論, en: Enable inference } }
 
-  - { action: fill, testid: camera-dialog-name, text: 大門西側 }
+  - { action: fill, testid: camera-dialog-name, text: { zh-Hant: 大門西側, en: Gate West } }
   - { action: fill, testid: camera-dialog-source, text: 'rtsp://192.0.2.10/live' }
 
   - action: screenshot
     name: camera-add-02
     clip: { testid: camera-dialog, padding: 12 }
     annotate:
-      - { key: confirm, testid: camera-dialog-confirm, legend: 建立 }
+      - { key: confirm, testid: camera-dialog-confirm, legend: { zh-Hant: 建立, en: Create } }
 
   - { action: click, testid: camera-dialog-confirm }
   - { action: waitFor, testid: toast }

@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 id: layout-preset
-title: 儲存版面設定
+title: { zh-Hant: 儲存版面設定, en: Saving a Layout }
 order: 30
 
 steps:
@@ -15,21 +15,21 @@ steps:
     name: layout-preset-01
     clip: { testid: grid-view, padding: 12 }
     annotate:
-      - { key: cell, testid: grid-cell_1, legend: 已配置的格子 }
-      - { key: fps, testid: grid-cell-fps_1, legend: 即時影格率 }
+      - { key: cell, testid: grid-cell_1, legend: { zh-Hant: 已配置的格子, en: Assigned cell } }
+      - { key: fps, testid: grid-cell-fps_1, legend: { zh-Hant: 即時影格率, en: Live frame rate } }
 
   - { action: click, testid: grid-layout_4x4 }
 
   - { action: click, testid: grid-preset-save }
   - { action: waitFor, testid: preset-dialog }
-  - { action: fill, testid: preset-dialog-name, text: 大廳巡檢 }
+  - { action: fill, testid: preset-dialog-name, text: { zh-Hant: 大廳巡檢, en: Lobby Patrol } }
 
   - action: screenshot
     name: layout-preset-02
     clip: { testid: preset-dialog, padding: 12 }
     annotate:
-      - { key: summary, testid: preset-dialog-summary, legend: 目前版面摘要 }
-      - { key: name, testid: preset-dialog-name, legend: 版面名稱 }
-      - { key: confirm, testid: preset-dialog-confirm, legend: 儲存 }
+      - { key: summary, testid: preset-dialog-summary, legend: { zh-Hant: 目前版面摘要, en: Current layout summary } }
+      - { key: name, testid: preset-dialog-name, legend: { zh-Hant: 版面名稱, en: Layout Name } }
+      - { key: confirm, testid: preset-dialog-confirm, legend: { zh-Hant: 儲存, en: Save } }
 
   - { action: click, testid: preset-dialog-confirm }

@@ -25,7 +25,8 @@ npm run demo:electron   # Electron 模式（會先 build 再啟動）
 跑產線本身：
 
 ```bash
-npm run manual                             # 整本 manifest，產出 screenshots/
+npm run manual                             # 整本 manifest × 所有語言，產出 screenshots/{locale}/
+npm run manual -- --locale en              # 只跑一個語言
 npm run manual -- --chapter layout-preset  # 只重跑一章
 npm run manual -- --mode web               # 指定形態（web 要另開終端機跑 npm run demo）
 ```
@@ -97,14 +98,14 @@ git checkout -- docs/50-camera-add.md      # 復原
 
 ### 重現 Day 20 的 Word / PDF 交付
 
-`npm run build` 把 `docs/` 的正文依 manifest 的 order 合併成 `output/manual.md`，
+`npm run build` 把 `docs/` 的正文依 manifest 的 order 合併成 `output/{locale}/manual.md`，
 展開 `{{legend.*}}` 與 `{{screenshot:*}}`（截圖下方自動附上 legend 表格），再交給 pandoc 套
 `templates/reference.docx` 產出 Word。需要先安裝 [pandoc](https://pandoc.org/installing.html)（文章用 3.11）。
 
 ```bash
 npm run manual                # 先把九張截圖拍好
-npm run build                 # output/manual.md + output/manual.docx
-npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 output/manual.pdf（需要 Windows + Word）
+npm run build                 # output/{locale}/manual.md + manual.docx
+npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 manual.pdf（需要 Windows + Word）
 ```
 
 封面的版本號取自 `manifest/manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
@@ -112,15 +113,33 @@ npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 output/m
 
 ### 重現 Day 21 的 HTML 版與不靠 Office 的 PDF
 
-同一份 `output/manual.md` 改交給 pandoc 產 HTML，樣式來自 `templates/manual.css`（HTML 版的 reference.docx）。
+同一份 `output/{locale}/manual.md` 改交給 pandoc 產 HTML，樣式來自 `templates/manual.css`（HTML 版的 reference.docx）。
 `--embed-resources` 會把截圖內嵌進去，產出單一檔案，可以直接放上網或寄出去。
 
 ```bash
-npm run build -- --to html          # output/manual.html
-npm run build -- --to html --pdf    # 再用 Playwright 的 Chromium 印成 output/manual-html.pdf
+npm run build -- --to html          # output/{locale}/manual.html
+npm run build -- --to html --pdf    # 再用 Playwright 的 Chromium 印成 manual-html.pdf
 ```
 
 第二條路不需要 Word 或 LibreOffice，Linux 上也能跑；代價是 PDF 的目錄沒有頁碼、封面也會印上頁碼。
+
+### 重現 Day 22 的多語言手冊
+
+`manifest/manual.yaml` 的 `locales: [zh-Hant, en]` 決定要出哪些語言，第一個是主語言。
+runner 逐語言把 `locale` 注入 localStorage，同一份 manifest 重跑一遍 —— 截圖本身不用改任何設定。
+
+會跟著語言變的欄位（章節標題、legend、示範輸入值）在 manifest 裡寫成 `{ zh-Hant: ..., en: ... }`，
+只寫字串代表每個語言都一樣（例如搜尋關鍵字 `lobby`）。正文的主語言在 `docs/`，其他語言在 `docs/{locale}/`。
+
+```bash
+npm run manual                        # 5 章 × 2 種語言 -> screenshots/zh-Hant/、screenshots/en/
+npm run validate                      # 每個語言各驗一次；英文正文的粗體名稱對照 en.json
+npm run build                         # output/zh-Hant/manual.docx、output/en/manual.docx
+npm run build -- --to html            # output/zh-Hant/manual.html、output/en/manual.html
+npm run build -- --locale en          # 只出英文版
+```
+
+Electron 模式每次開機都用一個全新的 userData 目錄 —— 否則上一次執行存下的設定會跟到下一次（例如人臉辨識已經是開的，再點一次反而關掉）。
 
 ### 這個靶長什麼樣子
 
@@ -164,7 +183,7 @@ localStorage.clear()                    // 復原
 ## 目錄結構
 
 repo 根目錄**本身就是一本手冊專案**：`manifest/` 是唯一的人為真相來源，
-`runner/` 讀它、驅動 App、產出 `screenshots/`，再與 `docs/` 的正文合流成 `output/`。
+`runner/` 讀它、驅動 App、逐語言產出 `screenshots/{locale}/`，再與 `docs/` 的正文合流成 `output/{locale}/`。
 
 ```
 auto-manual/
@@ -173,17 +192,18 @@ auto-manual/
 │  ├─ manual.yaml          #   profile + bootstrap（每一章開始前都要準備好的環境）
 │  └─ 20-live-monitor.yaml #   一章一個檔案，{order}-{id}.yaml
 ├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
-│  ├─ 10-overview.md
-│  └─ 20-live-monitor.md
+│  ├─ 10-overview.md       #   主語言（manual.yaml 的 locales 第一個）
+│  ├─ 20-live-monitor.md
+│  └─ en/                  #   其他語言各一個資料夾，檔名相同
 ├─ fixtures/               # 固定假資料，讓畫面每次都長一樣
 ├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
 ├─ templates/              # reference.docx，排版樣式與內容分離（pandoc 只讀它的樣式，不讀內容）
 ├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
 │  └─ run.ts               #   讀 manifest 驅動 App，一章一次開機（npm run manual）
 ├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染）
-├─ screenshots/            # 產線拍出來的圖（含標註），不進版控
-├─ output/                 # 最終的 manual.docx / manual.pdf
-│  └─ failures/{id}/       #   失敗現場：整頁截圖 + DOM dump，只給除錯用
+├─ screenshots/{locale}/   # 產線拍出來的圖（含標註），一個語言一個資料夾，不進版控
+├─ output/{locale}/        # 最終的 manual.docx / manual.pdf / manual.html
+│  └─ failures/{locale}/{id}/ # 失敗現場：整頁截圖 + DOM dump，只給除錯用
 ├─ agent/                  # 給 AI agent 的上下文（UI-MAP / STYLE / QUIRKS / few-shot）
 │  └─ diff-pairs/          #   已知答案的圖對，檢驗 AI 差異判讀
 ├─ plugin/                 # Claude Code plugin
@@ -194,7 +214,7 @@ auto-manual/
 命名約定是這條產線的接合處，不另外維護索引檔：
 
 ```
-manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
+manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{locale}/{id}-NN.png
 ```
 
 `order` 用 10 的倍數編號，中間留空間插入章節。

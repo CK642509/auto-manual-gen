@@ -17,10 +17,11 @@ npm run demo            # Web 模式，vite dev server，http://localhost:5173�
 npm run demo:electron   # Electron 模式（先 vite build 再 electron .）
 npm run demo:build      # 只 build，產物在 apps/demo-stream-app/dist/
 
-npm run manual                                 # 跑整本 manifest，產出 screenshots/
+npm run manual                                 # 跑整本 manifest × manual.yaml 的所有 locales，產出 screenshots/{locale}/
 npm run manual -- --chapter <id> --mode web    # 局部重跑；--mode 蓋過 config 的 app.mode
+npm run manual -- --locale en                  # 只跑一個語言（validate / build / probe 也吃 --locale）
 
-npm run build                     # 合併 docs/ 與截圖，pandoc 產出 output/manual.docx（需要 pandoc）
+npm run build                     # 合併 docs/ 與截圖，pandoc 產出 output/{locale}/manual.docx（需要 pandoc）
 npm run build -- --pdf            # 再用 Word COM 更新目錄並轉 PDF（只能在裝有 Word 的 Windows）
 npm run build -- --to html --pdf  # 單檔 HTML（templates/manual.css）+ Playwright 印出的 PDF，不需要 Office
 
@@ -33,7 +34,7 @@ Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev 
 
 尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/` 目前有 `drivers/`、`config.ts` 與 `run.ts`（動詞集還擠在 `run.ts` 裡，之後要拆進 `actions/` / `capture/` / `overlay/`），`manifest/` 有一本五章的示範手冊，`agent/` 有 UI-MAP / QUIRKS / STYLE 與 few-shot 範例，`docs/` 有兩章正文範例，`plugin/` 還只有 `.gitkeep`。
 
-產物一律不進版控：`screenshots/`（手冊要用的圖，扁平放置、檔名前綴就是章節 id）與 `output/`（最終文件，`failures/{id}/` 放失敗現場）都在 `.gitignore` 裡。
+產物一律不進版控：`screenshots/{locale}/`（手冊要用的圖，一個語言一個資料夾，裡面扁平放置、檔名前綴就是章節 id）與 `output/{locale}/`（最終文件；`failures/{locale}/{id}/` 放失敗現場）都在 `.gitignore` 裡。
 
 runner 的程式碼是 ESM TypeScript，用 `tsx` 直接跑，不編譯（根目錄 `package.json` 的 `"type": "module"` 是為此而設）。
 
@@ -67,8 +68,10 @@ CLI 與 runner 的輸出要**結構化**，錯誤訊息要說「你可以怎麼�
 ### 3. 靠命名約定串接，不用索引檔
 
 ```
-manifest 的章節 id  ↔  docs/{order}-{id}.md  ↔  screenshots/{id}-NN.png
+manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{locale}/{id}-NN.png
 ```
+
+多語言：`manual.yaml` 的 `locales` 第一個是主語言，正文放 `docs/`；其他語言放 `docs/{locale}/`。manifest 裡會跟著語言變的欄位（title / legend / fill 的 text）寫成 `{ zh-Hant: ..., en: ... }`，一律用 `manifest.ts` 的 `pick()` 取值；缺翻譯直接失敗，不退回主語言。build 自己寫進文件的字（圖號、表頭、封面）在 `build.ts` 的 `STRINGS`。
 
 `order` 用 10 的倍數編號，中間留空間插入章節。
 

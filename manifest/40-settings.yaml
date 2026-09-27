@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 id: settings
-title: 影像分析設定
+title: { zh-Hant: 影像分析設定, en: Video Analytics Settings }
 order: 40
 
 steps:
@@ -15,9 +15,9 @@ steps:
     name: settings-01
     clip: { testid: settings-section_analysis, padding: 12 }
     annotate:
-      - { key: motion, testid: settings-motion-enabled, legend: 動作偵測開關 }
-      - { key: face, testid: settings-face-enabled, legend: 人臉辨識開關 }
-      - { key: threshold, testid: settings-face-threshold, legend: 相似度門檻 }
+      - { key: motion, testid: settings-motion-enabled, legend: { zh-Hant: 動作偵測開關, en: Motion detection switch } }
+      - { key: face, testid: settings-face-enabled, legend: { zh-Hant: 人臉辨識開關, en: Face recognition switch } }
+      - { key: threshold, testid: settings-face-threshold, legend: { zh-Hant: 相似度門檻, en: Similarity threshold } }
 
   - { action: click, testid: settings-save }
   - { action: waitFor, testid: toast }

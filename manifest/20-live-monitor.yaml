@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 id: live-monitor
-title: 即時監控畫面
+title: { zh-Hant: 即時監控畫面, en: Live Monitoring }
 order: 20
 
 steps:
@@ -12,10 +12,11 @@ steps:
     name: live-monitor-01
     clip: { testid: monitor-page, padding: 12 }
     annotate:
-      - { key: search, testid: camera-search, legend: 攝影機搜尋框 }
-      - { key: layout, testid: grid-layout-group, legend: 版面切換 }
-      - { key: save, testid: grid-preset-save, legend: 儲存版面 }
+      - { key: search, testid: camera-search, legend: { zh-Hant: 攝影機搜尋框, en: Camera search box } }
+      - { key: layout, testid: grid-layout-group, legend: { zh-Hant: 版面切換, en: Layout switcher } }
+      - { key: save, testid: grid-preset-save, legend: { zh-Hant: 儲存版面, en: Save Layout } }
 
+  # 搜尋關鍵字跟攝影機名稱一樣不需要翻譯，只寫字串代表每個語言都用同一個值
   - { action: fill, testid: camera-search, text: lobby }
   - { action: dblclick, testid: camera-row_lobby-01 }
 
@@ -23,5 +24,5 @@ steps:
     name: live-monitor-02
     clip: { testid: grid-panel, padding: 12 }
     annotate:
-      - { key: cell, testid: grid-cell_1, legend: 剛填入的格子 }
-      - { key: remove, testid: grid-cell-remove_1, badge: left, legend: 移除此格 }
+      - { key: cell, testid: grid-cell_1, legend: { zh-Hant: 剛填入的格子, en: Newly filled cell } }
+      - { key: remove, testid: grid-cell-remove_1, badge: left, legend: { zh-Hant: 移除此格, en: Remove from cell } }
