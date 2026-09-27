@@ -25,6 +25,9 @@ npm run build                     # 合併 docs/ 與截圖，pandoc 產出 outpu
 npm run build -- --pdf            # 再用 Word COM 更新目錄並轉 PDF（只能在裝有 Word 的 Windows）
 npm run build -- --to html --pdf  # 單檔 HTML（templates/manual.css）+ Playwright 印出的 PDF，不需要 Office
 
+npm run sync -- --locale en       # 主語言正文改了哪幾段、譯文要重翻哪幾段（docs/{locale}/*.sync.json）
+npm run sync -- --locale en --accept <id>  # 譯文翻好後記下段落對照；要求兩邊段落一對一
+
 npm run typecheck       # tsc --noEmit，涵蓋 runner/ 與 tools/
 npm run driver:smoke               # driver 煙霧測試，走 config 的 app.mode
 npm run driver:smoke -- --mode web # 指定形態（web 模式要先開著 npm run demo）

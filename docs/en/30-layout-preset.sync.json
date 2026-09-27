@@ -1,0 +1,53 @@
+{
+  "source": "docs/30-layout-preset.md",
+  "blocks": [
+    {
+      "source": "66762c33",
+      "target": "a7b51a2e"
+    },
+    {
+      "source": "ff581173",
+      "target": "9eb87592"
+    },
+    {
+      "source": "60e82ffe",
+      "target": "04e379c6"
+    },
+    {
+      "source": "d4fd783e",
+      "target": "83950491"
+    },
+    {
+      "source": "432bac9a",
+      "target": "432bac9a"
+    },
+    {
+      "source": "ce93114c",
+      "target": "a4cd7d23"
+    },
+    {
+      "source": "be853be8",
+      "target": "be853be8"
+    },
+    {
+      "source": "b5c400b0",
+      "target": "f8d98b62"
+    },
+    {
+      "source": "ba6c2847",
+      "target": "76d70e3f"
+    },
+    {
+      "source": "e60d5f56",
+      "target": "51bef031"
+    },
+    {
+      "source": "a13a2269",
+      "target": "5a026689"
+    },
+    {
+      "source": "88b5fb76",
+      "target": "3a8ebf7b"
+    }
+  ]
+}

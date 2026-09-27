@@ -1,0 +1,29 @@
+$ npm run sync -- --locale en
+
+✔ overview  9 段都已同步
+✔ live-monitor  11 段都已同步
+✔ layout-preset  12 段都已同步
+✔ settings  11 段都已同步
+✖ camera-add
+    需要翻譯  第 27 行（需要翻譯）：新增的攝影機會出現在「攝影機清單」的最下方。
+    需要翻譯  第 33 行（需要翻譯）：> 注意：「{{legend.name}}」或「{{legend.source}
+    需要確認  原文第 31 行對應的譯文被改過：「{{legend.zone}}」預設為「大門」，「{{legend.enabl
+    舊譯文    docs/en/50-camera-add.md:29：**{{legend.zone}}** defaults to **Main G
+    舊譯文    docs/en/50-camera-add.md:31：> Note: While **{{legend.name}}** is emp
+
+$ npm run sync -- --locale en --accept camera-add
+
+camera-add: 無法記錄對照，原文與譯文的段落沒有一對一：
+  - 段落數不同：原文 15 段、譯文 14 段
+
+$ npm run sync -- --locale en --accept camera-add
+
+camera-add: 已記錄 15 段的對照 -> docs/en/50-camera-add.sync.json
+
+$ npm run sync -- --locale en
+
+✔ overview  9 段都已同步
+✔ live-monitor  11 段都已同步
+✔ layout-preset  12 段都已同步
+✔ settings  11 段都已同步
+✔ camera-add  15 段都已同步
