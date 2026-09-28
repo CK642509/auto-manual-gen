@@ -1,0 +1,20 @@
+# 正文改字（tools/samples/day25-camera-add-reworded.md）：只重產字幕，不重錄
+$ npm run video -- --locale zh-Hant --captions-only
+
+重產字幕（不重錄）：camera-add × 1 種語言（zh-Hant）  [electron]
+
+● [zh-Hant] camera-add  新增攝影機
+  字幕 8 句 -> output/video/zh-Hant/camera-add.srt、.vtt
+  ffmpeg -> output/video/zh-Hant/camera-add.mp4（448 KB，字幕軌）
+
+$ diff before.srt output/video/zh-Hant/camera-add.srt
+7c7
+< 點擊清單右上角的「新增攝影機」。
+---
+> 點擊攝影機清單右上角的「新增攝影機」按鈕。
+
+# manifest 的 steps 改了（多一個 hover）：時間軸作廢，只能重錄
+$ npm run video -- --locale zh-Hant --captions-only
+
+● [zh-Hant] camera-add  新增攝影機
+✖ [zh-Hant] camera-add  manifest 的 steps 跟錄影時不一樣了，畫面已經對不上，只能重錄（拿掉 --captions-only）
