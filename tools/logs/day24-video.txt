@@ -1,0 +1,12 @@
+$ npm run video -- --gif
+
+錄影：camera-add × 2 種語言（zh-Hant / en）  [electron]
+
+● [zh-Hant] camera-add  新增攝影機
+  錄完 21.7s -> output/video/zh-Hant/camera-add.webm
+  ffmpeg -> output/video/zh-Hant/camera-add.mp4（376 KB）
+  ffmpeg -> output/video/zh-Hant/camera-add.gif（2.9 MB）
+● [en] camera-add  Adding a Camera
+  錄完 23.7s -> output/video/en/camera-add.webm
+  ffmpeg -> output/video/en/camera-add.mp4（467 KB）
+  ffmpeg -> output/video/en/camera-add.gif（3.0 MB）

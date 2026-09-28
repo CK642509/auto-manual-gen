@@ -171,6 +171,21 @@ git checkout -- docs/                              # 復原
 
 執行紀錄存在 `tools/logs/day23-sync.txt`。
 
+### 重現 Day 24 的教學影片與 GIF
+
+錄影用的是同一份 manifest 的 `steps`，只是把「按快門」換成「從頭錄到尾」。
+章節要在 manifest 標上 `video: true` 才會錄（目前只有「新增攝影機」）；需要先安裝 [ffmpeg](https://ffmpeg.org/download.html)。
+
+```bash
+npm run video                              # 標了 video: true 的章節 × 所有語言 -> output/video/{locale}/{id}.mp4
+npm run video -- --locale zh-Hant --gif    # 只錄一個語言，並多轉一份 GIF
+npm run video -- --chapter layout-preset   # 沒標 video: true 的章節也可以指定來錄
+```
+
+錄影用 Playwright 新版的 `page.screencast`（本專案用 1.63），開機（含狀態注入後的 reload）做完才開始錄。
+畫面上的游標是 `runner/overlay/cursor.ts` 畫上去的假游標；截圖的位置改成停下來畫上同一套標註，並把 `clip` 以外調暗。
+執行紀錄在 `tools/logs/day24-video.txt`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
