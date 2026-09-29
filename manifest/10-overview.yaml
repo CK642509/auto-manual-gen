@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 id: overview
-title: 介面總覽
+title: { zh-Hant: 介面總覽, en: Interface Overview }
 order: 10
 
 steps:
@@ -12,6 +12,6 @@ steps:
     name: overview-01
     clip: { testid: app-root }
     annotate:
-      - { key: stats, testid: overview-stats, legend: 系統概況 }
-      - { key: cameras, testid: camera-panel, legend: 攝影機清單 }
-      - { key: grid, testid: grid-panel, legend: 即時畫面區 }
+      - { key: stats, testid: overview-stats, legend: { zh-Hant: 系統概況, en: System Overview } }
+      - { key: cameras, testid: camera-panel, legend: { zh-Hant: 攝影機清單, en: Cameras } }
+      - { key: grid, testid: grid-panel, legend: { zh-Hant: 即時畫面區, en: Live View Area } }

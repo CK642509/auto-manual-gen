@@ -4,6 +4,7 @@
  *   npm run validate
  *   npm run validate -- --chapter camera-add
  *   npm run validate -- --chapter camera-add --base main   # 保護區跟哪一版比，預設 HEAD
+ *   npm run validate -- --locale en                        # 只驗一個語言的正文；沒給就驗全部語言
  *
  * `run.ts` 開瀏覽器前也會做同一層動詞集檢查，這裡多做的是它不管的部分：
  * 檔名與 id/order 是否一致、id 是否重複、screenshot 命名與 annotate key 是否乾淨。
@@ -12,7 +13,7 @@
  * 正文（docs/）的檢查在 `docs.ts`：legend / 截圖引用、保護區，以及需要人工確認的名稱提醒。
  */
 import { validateDoc, validateDocNames } from './docs.js'
-import { loadChapters, validateActions, type Chapter } from './manifest.js'
+import { loadChapters, loadManual, selectLocales, validateActions, validateLocales, type Chapter } from './manifest.js'
 
 const arg = (name: string) => {
   const i = process.argv.indexOf(`--${name}`)
@@ -21,6 +22,15 @@ const arg = (name: string) => {
 
 const only = arg('chapter')
 const baseRef = arg('base') ?? 'HEAD'
+
+const manual = loadManual()
+let locales: string[]
+try {
+  locales = selectLocales(manual, arg('locale'))
+} catch (e) {
+  console.error((e as Error).message)
+  process.exit(1)
+}
 
 function validateNaming(chapter: Chapter): string[] {
   const errors: string[] = []
@@ -89,7 +99,12 @@ const duplicateIdErrors = [...idCounts.entries()]
 
 const problems = [
   ...duplicateIdErrors,
-  ...chapters.flatMap((c) => [...validateNaming(c), ...validateActions(c), ...validateScreenshots(c)]),
+  ...chapters.flatMap((c) => [
+    ...validateNaming(c),
+    ...validateActions(c),
+    ...validateScreenshots(c),
+    ...validateLocales(c, manual.locales),
+  ]),
 ]
 
 const list = (items: string[]) => items.map((e) => `  - ${e}`).join('\n')
@@ -102,28 +117,37 @@ if (problems.length > 0) {
 console.log(`manifest 驗證通過（${chapters.length} 章）。`)
 
 // manifest 過了才驗正文 —— 正文的引用要對照 manifest，manifest 本身壞掉時對照沒有意義
-const docErrors = only ? [] : validateDocNames(all)
-const docWarnings: string[] = []
-const withoutDocs: string[] = []
+// 每個語言各驗一次：同一套規則，對照表換成該語言的 App 文案（Day 22）
+let failed = false
 
-for (const c of chapters) {
-  const report = validateDoc(c, all, baseRef)
-  if (!report) {
-    withoutDocs.push(c.id)
-    continue
+for (const locale of locales) {
+  const docErrors = only ? [] : validateDocNames(all, locale)
+  const docWarnings: string[] = []
+  const withoutDocs: string[] = []
+
+  for (const c of chapters) {
+    const report = validateDoc(c, all, baseRef, locale)
+    if (!report) {
+      withoutDocs.push(c.id)
+      continue
+    }
+    docErrors.push(...report.errors)
+    docWarnings.push(...report.warnings)
   }
-  docErrors.push(...report.errors)
-  docWarnings.push(...report.warnings)
+
+  const checked = chapters.length - withoutDocs.length
+  if (withoutDocs.length > 0) console.log(`[${locale}] 尚未有正文：${withoutDocs.join(' / ')}`)
+
+  if (docWarnings.length > 0) console.warn(`[${locale}] 需要人工確認（${docWarnings.length} 則）：
+${list(docWarnings)}`)
+
+  if (docErrors.length > 0) {
+    console.error(`[${locale}] 正文驗證失敗（${docErrors.length} 個問題）：
+${list(docErrors)}`)
+    failed = true
+  } else if (checked > 0) {
+    console.log(`[${locale}] 正文驗證通過（${checked} 章）。`)
+  }
 }
 
-const checked = chapters.length - withoutDocs.length
-if (withoutDocs.length > 0) console.log(`尚未有正文：${withoutDocs.join(' / ')}`)
-
-if (docWarnings.length > 0) console.warn(`需要人工確認（${docWarnings.length} 則）：\n${list(docWarnings)}`)
-
-if (docErrors.length > 0) {
-  console.error(`正文驗證失敗（${docErrors.length} 個問題）：\n${list(docErrors)}`)
-  process.exit(1)
-}
-
-if (checked > 0) console.log(`正文驗證通過（${checked} 章）。`)
+if (failed) process.exit(1)

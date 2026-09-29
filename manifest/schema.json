@@ -11,7 +11,7 @@
       "pattern": "^[a-z][a-z0-9-]*$",
       "description": "章節 id，必須跟檔名 {order}-{id}.yaml 的 {id} 一致，也是 screenshots/{id}-NN.png 的檔名前綴"
     },
-    "title": { "type": "string", "minLength": 1 },
+    "title": { "$ref": "#/definitions/localized" },
     "order": {
       "type": "integer",
       "multipleOf": 10,
@@ -25,6 +25,17 @@
     }
   },
   "definitions": {
+    "localized": {
+      "description": "會跟著語言變的欄位：只寫字串代表每個語言都一樣；寫成 { zh-Hant: ..., en: ... } 就是逐語言指定，必須涵蓋 manual.yaml 的所有 locales",
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      ]
+    },
     "step": {
       "type": "object",
       "required": ["action"],
@@ -34,7 +45,7 @@
           "enum": ["click", "dblclick", "fill", "waitFor", "wait", "scroll", "hover", "dismiss", "screenshot"]
         },
         "testid": { "type": "string" },
-        "text": { "type": "string" },
+        "text": { "$ref": "#/definitions/localized" },
         "state": { "type": "string", "enum": ["visible", "detached"] },
         "name": { "type": "string" },
         "clip": {
@@ -53,7 +64,7 @@
             "properties": {
               "key": { "type": "string" },
               "testid": { "type": "string" },
-              "legend": { "type": "string" },
+              "legend": { "$ref": "#/definitions/localized" },
               "badge": {
                 "enum": ["corner", "left"],
                 "description": "編號圓標的位置。corner（預設）：左上角；left：左邊框中點，目標太小時整顆移到框外"

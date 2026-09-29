@@ -28,6 +28,14 @@
 - 動作用「點擊」「雙擊」「輸入」「選擇」「開啟」，不用「按下」「點選」「打開」。
 - 示範用的輸入值（例如「大門西側」）照 manifest 寫，加「」。
 
+### 英文版（`docs/en/`）
+
+- 規則同上，只是名稱的標示從「」換成**粗體**：`Click **{{legend.confirm}}**.`
+- 沒有標號的元件，名稱取自 `locales/en.json`，一字不改 —— 畫面上是 **Add Camera** 就不要寫成 New Camera。
+- 動作用 Click / Double-click / Type / Select / Turn on；操作步驟用祈使句。
+- 示範輸入值照 manifest 的 `en` 值寫，同樣加粗體。
+- 保護區（法規、警語）由人翻譯與審核，agent 不動。
+
 ## 句型
 
 - 操作步驟用祈使句：寫「點擊「{{legend.confirm}}」」，不寫「使用者可以點擊……」。

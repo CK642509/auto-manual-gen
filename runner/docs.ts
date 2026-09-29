@@ -5,25 +5,40 @@
  *
  * - 錯誤（擋下來）：引用了不存在的 legend / 截圖、截圖漏放或重複、保護區標記壞掉、
  *   保護區內容跟上一版不同。這些都是對或錯，沒有灰色地帶。
- * - 提醒（需要人工確認）：正文用「」引用的名稱，在 App 文案、manifest、章節標題與示範資料裡都找不到。
+ * - 提醒（需要人工確認）：正文引用的名稱，在 App 文案、manifest、章節標題與示範資料裡都找不到。
  *   找不到不一定是錯，但這正是「正文描述了不存在的功能」最常見的樣子，交給人看。
+ *
+ * 多語言（Day 22）：主語言的正文在 `docs/`，其他語言在 `docs/{locale}/`，同一套檢查逐語言各跑一次。
+ * 名稱交叉檢查的對照表換成該語言的 App 文案 —— 英文正文裡的按鈕名稱，要對得上英文介面上的字。
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { loadConfig, repoRoot } from './config.js'
-import { rel, type Chapter } from './manifest.js'
+import { loadManual, pick, rel, type Chapter } from './manifest.js'
 
 export type DocReport = { errors: string[]; warnings: string[] }
 
 const PROTECTED_START = '<!-- protected:start -->'
 const PROTECTED_END = '<!-- protected:end -->'
 
-const LOCALE_FILE = 'apps/demo-stream-app/src/renderer/locales/zh-Hant.json'
+/** App 的 i18n 檔 —— 同時是手冊的術語表：正文裡的按鈕名稱，要等於畫面上真正顯示的字。 */
+const localeFile = (locale: string) => `apps/demo-stream-app/src/renderer/locales/${locale}.json`
 const CAMERA_DATA_FILE = 'apps/demo-stream-app/src/renderer/data/cameras.ts'
 
-export function docsDir(): string {
-  return path.join(repoRoot, loadConfig().paths.docs)
+/**
+ * 正文怎麼標示「這是畫面上的名稱」，每個語言的慣例不同：中文用「」，英文用粗體。
+ * 名稱交叉檢查就靠這個樣式把名稱抓出來。
+ */
+const TERM_PATTERN: Record<string, RegExp> = {
+  'zh-Hant': /「([^「」]+)」/g,
+  en: /\*\*([^*\n]+)\*\*/g,
+}
+
+/** 主語言的正文在 `docs/`，其他語言在 `docs/{locale}/`。 */
+export function docsDir(locale?: string): string {
+  const base = path.join(repoRoot, loadConfig().paths.docs)
+  return locale && locale !== loadManual().locales[0] ? path.join(base, locale) : base
 }
 
 export const docFileName = (chapter: Chapter) => `${chapter.order}-${chapter.id}.md`
@@ -31,8 +46,9 @@ export const docFileName = (chapter: Chapter) => `${chapter.order}-${chapter.id}
 const readText = (file: string) => fs.readFileSync(file, 'utf-8').replace(/\r\n/g, '\n')
 
 /** 檔名要能對回某一章 manifest —— 命名約定就是索引，對不上的正文等於孤兒。 */
-export function validateDocNames(chapters: Chapter[]): string[] {
-  const dir = docsDir()
+export function validateDocNames(chapters: Chapter[], locale?: string): string[] {
+  const dir = docsDir(locale)
+  const at = rel(dir)
   if (!fs.existsSync(dir)) return []
 
   const expected = new Map(chapters.map((c) => [docFileName(c), c]))
@@ -42,8 +58,8 @@ export function validateDocNames(chapters: Chapter[]): string[] {
     .map((f) => {
       const byId = chapters.find((c) => f.replace(/^\d+-/, '').replace(/\.md$/, '') === c.id)
       return byId
-        ? `docs/${f}: 檔名應該是 ${docFileName(byId)}（order 跟 manifest 不一致）`
-        : `docs/${f}: 找不到對應的 manifest 章節，可用的有：${chapters.map(docFileName).join(' / ')}`
+        ? `${at}/${f}: 檔名應該是 ${docFileName(byId)}（order 跟 manifest 不一致）`
+        : `${at}/${f}: 找不到對應的 manifest 章節，可用的有：${chapters.map(docFileName).join(' / ')}`
     })
 }
 
@@ -108,13 +124,13 @@ function validateProtectedUnchanged(before: string[], after: string[], at: strin
   return errors
 }
 
-/** 正文可以用「」引用的名稱：App 文案、manifest 裡的 legend 與輸入值、其他章節的標題、示範資料的攝影機名稱。 */
-function knownTerms(chapter: Chapter, all: Chapter[]): { exact: Set<string>; patterns: RegExp[] } {
+/** 正文可以引用的名稱：該語言的 App 文案、manifest 裡的 legend 與輸入值、其他章節的標題、示範資料的攝影機名稱。 */
+function knownTerms(chapter: Chapter, all: Chapter[], locale: string): { exact: Set<string>; patterns: RegExp[] } {
   const exact = new Set<string>()
   const patterns: RegExp[] = []
 
-  const locale = JSON.parse(readText(path.join(repoRoot, LOCALE_FILE))) as Record<string, string>
-  for (const value of Object.values(locale)) {
+  const messages = JSON.parse(readText(path.join(repoRoot, localeFile(locale)))) as Record<string, string>
+  for (const value of Object.values(messages)) {
     if (value.includes('{')) {
       const escaped = value.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\\?\{[^}]+\}/g, '.+')
       patterns.push(new RegExp(`^${escaped}$`))
@@ -124,18 +140,19 @@ function knownTerms(chapter: Chapter, all: Chapter[]): { exact: Set<string>; pat
   }
 
   for (const step of chapter.steps) {
-    if (step.action === 'fill' && step.text) exact.add(step.text)
-    for (const a of step.annotate ?? []) exact.add(a.legend)
+    if (step.action === 'fill' && step.text) exact.add(pick(step.text, locale))
+    for (const a of step.annotate ?? []) exact.add(pick(a.legend, locale))
   }
-  for (const c of all) exact.add(c.title)
+  for (const c of all) exact.add(pick(c.title, locale))
 
   for (const m of readText(path.join(repoRoot, CAMERA_DATA_FILE)).matchAll(/name: '([^']+)'/g)) exact.add(m[1])
 
   return { exact, patterns }
 }
 
-export function validateDoc(chapter: Chapter, all: Chapter[], baseRef: string): DocReport | null {
-  const file = path.join(docsDir(), docFileName(chapter))
+export function validateDoc(chapter: Chapter, all: Chapter[], baseRef: string, locale?: string): DocReport | null {
+  locale ??= loadManual().locales[0]
+  const file = path.join(docsDir(locale), docFileName(chapter))
   if (!fs.existsSync(file)) return null
 
   const at = rel(file)
@@ -173,12 +190,17 @@ export function validateDoc(chapter: Chapter, all: Chapter[], baseRef: string): 
 
   // 名稱交叉檢查：保護區裡是人寫的，不檢查
   const outsideProtected = text.replace(/<!-- protected:start -->[\s\S]*?<!-- protected:end -->/g, '')
-  const { exact, patterns } = knownTerms(chapter, all)
-  for (const m of outsideProtected.matchAll(/「([^「」]+)」/g)) {
+  const pattern = TERM_PATTERN[locale]
+  if (!pattern) {
+    warnings.push(`${at}: 還沒定義 ${locale} 的名稱標示慣例（TERM_PATTERN），這個語言跳過名稱交叉檢查`)
+    return { errors, warnings }
+  }
+  const { exact, patterns } = knownTerms(chapter, all, locale)
+  for (const m of outsideProtected.matchAll(pattern)) {
     const term = m[1].replace(/『/g, '「').replace(/』/g, '」')
     if (term.includes('{{')) continue
     if (exact.has(term) || patterns.some((p) => p.test(term))) continue
-    warnings.push(`${at}: 「${m[1]}」在 App 文案、manifest、章節標題與示範資料裡都找不到，請人工確認畫面上真的有這個名稱`)
+    warnings.push(`${at}: ${m[0]} 在 ${locale} 的 App 文案、manifest、章節標題與示範資料裡都找不到，請人工確認畫面上真的有這個名稱`)
   }
 
   return { errors, warnings }

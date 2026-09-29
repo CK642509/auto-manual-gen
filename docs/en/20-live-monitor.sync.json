@@ -1,0 +1,49 @@
+{
+  "source": "docs/20-live-monitor.md",
+  "blocks": [
+    {
+      "source": "70cafc5d",
+      "target": "b8994d7f"
+    },
+    {
+      "source": "85949242",
+      "target": "ee9f341f"
+    },
+    {
+      "source": "60e82ffe",
+      "target": "04e379c6"
+    },
+    {
+      "source": "643e16c3",
+      "target": "076253c6"
+    },
+    {
+      "source": "5c112c89",
+      "target": "5c112c89"
+    },
+    {
+      "source": "eba3fcce",
+      "target": "059729e2"
+    },
+    {
+      "source": "515f6cf6",
+      "target": "515f6cf6"
+    },
+    {
+      "source": "ba6c2847",
+      "target": "76d70e3f"
+    },
+    {
+      "source": "b93e0282",
+      "target": "67b0a655"
+    },
+    {
+      "source": "39aadd7a",
+      "target": "2b019085"
+    },
+    {
+      "source": "8b2db4de",
+      "target": "48dab0a6"
+    }
+  ]
+}
