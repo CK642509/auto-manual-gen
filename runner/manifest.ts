@@ -36,6 +36,8 @@ export type Chapter = {
   file: string
   /** 這一章也要出教學影片（Day 24）。錄影很貴，預設不錄，要錄的章節明確標出來。 */
   video?: boolean
+  /** 這一章也做成 App 內導覽（Day 26）。依賴示範資料或目前狀態的章節不適合，要做的章節明確標出來。 */
+  tour?: boolean
 }
 
 export type Manual = {
