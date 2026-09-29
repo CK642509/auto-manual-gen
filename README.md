@@ -203,6 +203,21 @@ npm run video -- --captions-only           # 正文改字時用：不重錄，�
 不然 3 秒就消失的 toast 撐不到字幕讀完。重現「只改正文、不重錄」：把 `tools/samples/day25-camera-add-reworded.md`
 複製成 `docs/50-camera-add.md`，再跑 `--captions-only`。執行紀錄在 `tools/logs/day25-*.txt`。
 
+### 重現 Day 26 的 App 內導覽
+
+同一份 manifest 與正文，轉成 App 自己的操作導覽：右上角的「?」選一章，[driver.js](https://driverjs.com/) 會一步一步指著畫面上的元件，
+請使用者自己操作。章節要在 manifest 標上 `tour: true` 才會產生（目前是「介面總覽」與「新增攝影機」）。
+
+```bash
+npm run tour               # -> apps/demo-stream-app/src/renderer/help/tours.json
+npm run tour -- --check    # manifest / 正文改了但 tours.json 沒重產，就以非 0 結束
+npm run demo               # 開 App，按右上角的「?」
+```
+
+`tours.json` 是產物，但它要跟著 App 一起打包，所以跟 i18n 檔一樣進版控。
+依賴示範資料的章節（例如雙擊 `camera-row_lobby-01` 的「即時監控畫面」）標上 `tour: true` 會直接被擋下來。
+執行紀錄在 `tools/logs/day26-tour.txt`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
