@@ -171,6 +171,38 @@ git checkout -- docs/                              # 復原
 
 執行紀錄存在 `tools/logs/day23-sync.txt`。
 
+### 重現 Day 24 的教學影片與 GIF
+
+錄影用的是同一份 manifest 的 `steps`，只是把「按快門」換成「從頭錄到尾」。
+章節要在 manifest 標上 `video: true` 才會錄（目前只有「新增攝影機」）；需要先安裝 [ffmpeg](https://ffmpeg.org/download.html)。
+
+```bash
+npm run video                              # 標了 video: true 的章節 × 所有語言 -> output/video/{locale}/{id}.mp4
+npm run video -- --locale zh-Hant --gif    # 只錄一個語言，並多轉一份 GIF
+npm run video -- --chapter layout-preset   # 沒標 video: true 的章節也可以指定來錄
+```
+
+錄影用 Playwright 新版的 `page.screencast`（本專案用 1.63），開機（含狀態注入後的 reload）做完才開始錄。
+畫面上的游標是 `runner/overlay/cursor.ts` 畫上去的假游標；截圖的位置改成停下來畫上同一套標註，並把 `clip` 以外調暗。
+執行紀錄在 `tools/logs/day24-video.txt`。
+
+### 重現 Day 25 的字幕與旁白
+
+字幕不另外寫：內容取自正文的編號步驟、legend 與「完成後」的第一段（`runner/video/captions.ts`）。
+正文跟 manifest 都有同名的截圖，先用截圖把兩邊切段，再在每一段裡把編號步驟配對到會動的 step。
+錄影時記下每個 step 的時間（`output/video/{locale}/{id}.timeline.json`），字幕的時間就從這裡來。
+
+```bash
+npm run video                              # mp4 內含可開關的字幕軌，另外輸出 .srt / .vtt
+npm run video -- --burn --gif              # 字幕燒進畫面（GIF 沒有字幕軌，要字幕只能燒進去）
+npm run video -- --narrate                 # TTS 旁白（Windows 內建的 System.Speech，需要 zh-TW / en-US 語音）
+npm run video -- --captions-only           # 正文改字時用：不重錄，只用上次的時間軸重產字幕
+```
+
+節奏由字幕決定：下一句字幕出現之前，會先等上一句讀完（有旁白就是念完）；截圖的位置停留時會暫停頁面的計時器，
+不然 3 秒就消失的 toast 撐不到字幕讀完。重現「只改正文、不重錄」：把 `tools/samples/day25-camera-add-reworded.md`
+複製成 `docs/50-camera-add.md`，再跑 `--captions-only`。執行紀錄在 `tools/logs/day25-*.txt`。
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：

@@ -2,6 +2,8 @@
 id: camera-add
 title: { zh-Hant: 新增攝影機, en: Adding a Camera }
 order: 50
+# 同一份 steps 也錄成教學影片（Day 24）
+video: true
 
 steps:
   - { action: waitFor, testid: camera-list-skeleton, state: detached }

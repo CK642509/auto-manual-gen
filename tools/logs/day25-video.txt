@@ -1,0 +1,27 @@
+$ npm run video
+
+錄影：camera-add × 2 種語言（zh-Hant / en）  [electron]
+
+● [zh-Hant] camera-add  新增攝影機
+  錄完 25.8s -> output/video/zh-Hant/camera-add.webm
+  字幕 8 句 -> output/video/zh-Hant/camera-add.srt、.vtt
+  ffmpeg -> output/video/zh-Hant/camera-add.mp4（473 KB，字幕軌）
+● [en] camera-add  Adding a Camera
+  錄完 30.0s -> output/video/en/camera-add.webm
+  字幕 8 句 -> output/video/en/camera-add.srt、.vtt
+  ffmpeg -> output/video/en/camera-add.mp4（493 KB，字幕軌）
+
+$ npm run video -- --narrate
+
+錄影 + 旁白：camera-add × 2 種語言（zh-Hant / en）  [electron]
+
+● [zh-Hant] camera-add  新增攝影機
+  TTS 8 句，共 35.6s
+  錄完 42.5s -> output/video/zh-Hant/camera-add.webm
+  字幕 8 句 -> output/video/zh-Hant/camera-add.srt、.vtt
+  ffmpeg -> output/video/zh-Hant/camera-add.mp4（934 KB，旁白、字幕軌）
+● [en] camera-add  Adding a Camera
+  TTS 8 句，共 32.1s
+  錄完 39.8s -> output/video/en/camera-add.webm
+  字幕 8 句 -> output/video/en/camera-add.srt、.vtt
+  ffmpeg -> output/video/en/camera-add.mp4（894 KB，旁白、字幕軌）

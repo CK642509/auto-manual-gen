@@ -18,6 +18,10 @@
       "minimum": 10,
       "description": "10 的倍數，數字之間留空間方便之後插章"
     },
+    "video": {
+      "type": "boolean",
+      "description": "這一章也要錄成教學影片（npm run video）。錄影的維護成本比截圖高很多，只給少數關鍵流程標上"
+    },
     "steps": {
       "type": "array",
       "minItems": 1,

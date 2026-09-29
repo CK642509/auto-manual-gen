@@ -28,7 +28,15 @@ export type Step = {
   clip?: { testid: string; padding?: number }
   annotate?: Annotation[]
 }
-export type Chapter = { id: string; title: Localized; order: number; steps: Step[]; file: string }
+export type Chapter = {
+  id: string
+  title: Localized
+  order: number
+  steps: Step[]
+  file: string
+  /** 這一章也要出教學影片（Day 24）。錄影很貴，預設不錄，要錄的章節明確標出來。 */
+  video?: boolean
+}
 
 export type Manual = {
   profile: string

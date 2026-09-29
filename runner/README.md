@@ -8,7 +8,7 @@
 | `actions/` | manifest 的動詞集：`click` / `dblclick` / `fill` / `waitFor` / `screenshot` / `setStorage` / `scroll` / `hover` / `dismiss` |
 | `capture/` | 截圖構圖與裁切：整頁 / 元素 / `clip` 區域，以及印刷解析度的推算 |
 | `overlay/` | **注入 DOM 疊層**。畫框、編號圓標與碰撞避讓、遮蔽、假游標 —— 四件事共用同一套渲染 |
-| `video/` | 錄影與字幕：`recordVideo`、`slowMo`、從 step 時間軸產 `.srt` |
+| `video/` | **已實作錄影**。`record.ts` 把標了 `video: true` 的章節用 `page.screencast` 錄成 `output/video/{locale}/{id}.webm`，`encode.ts` 用 ffmpeg 轉 mp4 / GIF。`captions.ts` 從正文產字幕、錄影時記時間軸；`tts.ts` 用 TTS 念旁白。假游標在 `overlay/cursor.ts`，標註與截圖共用 `overlay/annotate.ts` |
 | `run.ts` | **已實作**。讀 manifest，一章一次開機，逐語言產出 `screenshots/{locale}/{name}.png`；失敗時把現場寫進 `output/failures/{locale}/{id}/` |
 | `build.ts` | **已實作**。逐語言合併 `docs/[{locale}/]` 與截圖成 `output/{locale}/manual.md`，pandoc 套 `templates/reference.docx` 產 docx；`--pdf` 再交給 `word-export.ps1` 更新目錄並轉 PDF。`--to html` 改產單檔 HTML（`templates/manual.css`），搭配 `--pdf` 由 Chromium 印成 PDF |
 | `sync.ts` | **已實作**。翻譯同步：主語言正文逐段算 hash，對照 `docs/{locale}/*.sync.json` 找出需要翻譯的段落、被直接改過的譯文與舊譯文；`--accept <id>` 在兩邊段落一對一時記下對照 |
@@ -23,6 +23,7 @@
 | `auto-manual probe` | 列出當前畫面可見且具 testid 的元件 | **agent** |
 | `auto-manual run --chapter <id>` | 執行（可局部重跑）。目前的實作是 `npm run manual -- --chapter <id>` | 人 + agent |
 | `auto-manual validate` | schema + selector 存在性 + 編號一致性 | 人 + agent + CI |
+| `auto-manual video` | 把標了 `video: true` 的章節錄成教學影片。目前的實作是 `npm run video -- --gif` | 人 |
 | `auto-manual build` | 合併正文與截圖，pandoc 產 docx / pdf。目前的實作是 `npm run build -- --pdf` | 人 + CI |
 
 ## `AppDriver`
