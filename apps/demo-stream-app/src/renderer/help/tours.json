@@ -1,0 +1,155 @@
+{
+  "version": "v1.2.0",
+  "tours": {
+    "zh-Hant": [
+      {
+        "id": "overview",
+        "title": "介面總覽",
+        "steps": [
+          {
+            "kind": "info",
+            "testid": "overview-stats",
+            "title": "系統概況",
+            "text": "顯示「線上攝影機」、「待處理告警」與「推論 FPS」。"
+          },
+          {
+            "kind": "info",
+            "testid": "camera-panel",
+            "title": "攝影機清單",
+            "text": "列出所有攝影機，可以搜尋名稱或位置，也可以點擊「新增攝影機」。"
+          },
+          {
+            "kind": "info",
+            "testid": "grid-panel",
+            "title": "即時畫面區",
+            "text": "顯示攝影機的即時畫面，上方可以切換「版面」與套用「版面設定」。"
+          },
+          {
+            "kind": "done",
+            "title": "介面總覽",
+            "text": "在「攝影機清單」雙擊一台攝影機，它的即時畫面就會依序填入「即時畫面區」的空格，詳見「即時監控畫面」一章。"
+          }
+        ]
+      },
+      {
+        "id": "camera-add",
+        "title": "新增攝影機",
+        "steps": [
+          {
+            "kind": "click",
+            "testid": "camera-add",
+            "text": "點擊清單右上角的「新增攝影機」。"
+          },
+          {
+            "kind": "fill",
+            "testid": "camera-dialog-name",
+            "title": "顯示名稱",
+            "example": "大門西側"
+          },
+          {
+            "kind": "info",
+            "testid": "camera-dialog-zone",
+            "title": "安裝位置"
+          },
+          {
+            "kind": "fill",
+            "testid": "camera-dialog-source",
+            "title": "RTSP 位址",
+            "example": "rtsp://192.0.2.10/live"
+          },
+          {
+            "kind": "info",
+            "testid": "camera-dialog-enabled",
+            "title": "啟用推論"
+          },
+          {
+            "kind": "click",
+            "testid": "camera-dialog-confirm",
+            "title": "建立",
+            "text": "點擊「建立」。"
+          },
+          {
+            "kind": "done",
+            "title": "新增攝影機",
+            "text": "畫面出現「已新增攝影機『…』」的通知，表示攝影機已經建立。"
+          }
+        ]
+      }
+    ],
+    "en": [
+      {
+        "id": "overview",
+        "title": "Interface Overview",
+        "steps": [
+          {
+            "kind": "info",
+            "testid": "overview-stats",
+            "title": "System Overview",
+            "text": "shows **Cameras Online**, **Open Alerts**, and **Inference FPS**."
+          },
+          {
+            "kind": "info",
+            "testid": "camera-panel",
+            "title": "Cameras",
+            "text": "lists every camera. You can search by name or zone, or click **Add Camera**."
+          },
+          {
+            "kind": "info",
+            "testid": "grid-panel",
+            "title": "Live View Area",
+            "text": "shows the live view of each camera. Use **Layout** and **Saved layout** at the top to change the grid."
+          },
+          {
+            "kind": "done",
+            "title": "Interface Overview",
+            "text": "Double-click a camera in Cameras to place its live view in the next empty cell of Live View Area. See the Live Monitoring chapter for details."
+          }
+        ]
+      },
+      {
+        "id": "camera-add",
+        "title": "Adding a Camera",
+        "steps": [
+          {
+            "kind": "click",
+            "testid": "camera-add",
+            "text": "Click Add Camera in the upper-right corner of the list."
+          },
+          {
+            "kind": "fill",
+            "testid": "camera-dialog-name",
+            "title": "Display Name",
+            "example": "Gate West"
+          },
+          {
+            "kind": "info",
+            "testid": "camera-dialog-zone",
+            "title": "Installation Zone"
+          },
+          {
+            "kind": "fill",
+            "testid": "camera-dialog-source",
+            "title": "RTSP URL",
+            "example": "rtsp://192.0.2.10/live"
+          },
+          {
+            "kind": "info",
+            "testid": "camera-dialog-enabled",
+            "title": "Enable inference"
+          },
+          {
+            "kind": "click",
+            "testid": "camera-dialog-confirm",
+            "title": "Create",
+            "text": "Click Create."
+          },
+          {
+            "kind": "done",
+            "title": "Adding a Camera",
+            "text": "The notification Camera \"…\" created appears, which means the camera has been created."
+          }
+        ]
+      }
+    ]
+  }
+}

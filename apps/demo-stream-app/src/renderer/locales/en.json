@@ -125,5 +125,10 @@
 
   "settings.save": "Save Settings",
   "settings.reset": "Restore Defaults",
-  "settings.disabledHint": "Turn on the switch above first"
+  "settings.disabledHint": "Turn on the switch above first",
+
+  "help.title": "Guided Tours",
+  "tour.next": "Next",
+  "tour.done": "Done",
+  "tour.example": "Enter your own value, for example \"{value}\"."
 }

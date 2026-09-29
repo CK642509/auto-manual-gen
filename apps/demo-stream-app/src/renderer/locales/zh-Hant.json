@@ -125,5 +125,10 @@
 
   "settings.save": "儲存設定",
   "settings.reset": "還原預設值",
-  "settings.disabledHint": "需要先開啟上方開關"
+  "settings.disabledHint": "需要先開啟上方開關",
+
+  "help.title": "操作導覽",
+  "tour.next": "下一步",
+  "tour.done": "完成",
+  "tour.example": "請輸入實際的內容，例如「{value}」。"
 }
