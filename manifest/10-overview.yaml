@@ -2,6 +2,8 @@
 id: overview
 title: { zh-Hant: 介面總覽, en: Interface Overview }
 order: 10
+# 也做成 App 內導覽（Day 26）
+tour: true
 
 steps:
   # 等骨架屏消失、清單出現才開始（Day 10）

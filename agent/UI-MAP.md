@@ -6,7 +6,7 @@
 ## 導覽
 
 ```
-topbar（全域，兩個分頁都看得到）
+topbar（全域，兩個分頁都看得到；右上角的 topbar-help 是操作導覽選單）
 ├── nav-tab_monitor    即時監控   ← 預設分頁
 └── nav-tab_settings   系統設定
 ```

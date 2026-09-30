@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import HelpMenu from './components/HelpMenu.vue'
 import MonitorPage from './components/MonitorPage.vue'
 import SettingsPage from './components/SettingsPage.vue'
 import ToastHost from './components/ToastHost.vue'
 import { useCameras } from './composables/useCameras'
 import { useSettings } from './composables/useSettings'
 import { useToast } from './composables/useToast'
+import { startTour, type Tour } from './help/useTour'
 import { resolveLocale, translate, type Locale } from './locales'
 
 type Tab = 'monitor' | 'settings'
@@ -54,6 +56,16 @@ function onResetSettings() {
   reset()
   push(t('toast.settingsReset'))
 }
+
+/*
+ * 導覽跟手冊的每一章一樣，從「即時監控」分頁開始（Day 26）。
+ * manifest 的 steps 是從 bootstrap 的畫面寫起的，導覽如果從別的分頁開始，第一步就找不到元件。
+ */
+async function onStartTour(tour: Tour) {
+  tab.value = 'monitor'
+  await nextTick()
+  startTour(tour, locale.value)
+}
 </script>
 
 <template>
@@ -82,6 +94,7 @@ function onResetSettings() {
         <button class="btn ghost sm" data-testid="topbar-locale" @click="toggleLocale">
           {{ locale === 'zh-Hant' ? 'EN' : '中文' }}
         </button>
+        <HelpMenu :locale="locale" @start="onStartTour" />
       </div>
     </header>
 

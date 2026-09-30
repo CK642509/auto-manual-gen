@@ -4,6 +4,8 @@ title: { zh-Hant: 新增攝影機, en: Adding a Camera }
 order: 50
 # 同一份 steps 也錄成教學影片（Day 24）
 video: true
+# 也做成 App 內導覽（Day 26）
+tour: true
 
 steps:
   - { action: waitFor, testid: camera-list-skeleton, state: detached }

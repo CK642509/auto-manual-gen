@@ -42,6 +42,8 @@ topbar（產品名、分頁、角色、執行環境、語言）
 | `topbar-role` | 目前角色（操作員 / 管理員） |
 | `topbar-runtime` | 顯示 Web / Electron 模式 |
 | `topbar-locale` | 語言切換按鈕 |
+| `topbar-help` | 「?」操作導覽按鈕 |
+| `help-menu` / `help-menu-item_{章節 id}` | 導覽選單，**前置條件：按過 `topbar-help`**；項目來自 `help/tours.json`（Day 26） |
 | `nav-tabs` | 分頁列 |
 | `nav-tab_monitor` / `nav-tab_settings` | 兩個分頁 |
 | `toast-host` | Toast 容器，永遠存在 |

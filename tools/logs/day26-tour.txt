@@ -1,0 +1,17 @@
+$ npm run tour
+
+[zh-Hant] overview  介面總覽  4 步
+[zh-Hant] camera-add  新增攝影機  7 步
+[en] overview  Interface Overview  4 步
+[en] camera-add  Adding a Camera  7 步
+-> apps/demo-stream-app/src/renderer/help/tours.json
+
+$ npm run tour -- --check
+
+apps/demo-stream-app/src/renderer/help/tours.json 是最新的（2 章 × 2 種語言）
+
+# 把「即時監控畫面」也標上 tour: true
+$ npm run tour
+
+導覽驗證失敗（1 個問題）：
+  - live-monitor.steps[4]: dblclick camera-row_lobby-01 指向示範資料「lobby-01」，使用者的畫面上不一定有這台攝影機。這一章不適合做成導覽，拿掉 tour: true

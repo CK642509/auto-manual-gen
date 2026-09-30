@@ -17,6 +17,7 @@
     "validate": "tsx runner/validate.ts",
     "build": "tsx runner/build.ts",
     "sync": "tsx runner/sync.ts",
+    "tour": "tsx runner/tour.ts",
     "video": "tsx runner/video/record.ts",
     "terminal:shot": "tsx tools/terminal-shot.ts",
     "driver:smoke": "tsx runner/drivers/smoke.ts"
