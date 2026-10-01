@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./schema.json
+# yaml-language-server: $schema=https://ck642509.github.io/auto-manual-gen/schema/v1/manifest.json
 id: layout-preset
 title: { zh-Hant: 儲存版面設定, en: Saving a Layout }
 order: 30

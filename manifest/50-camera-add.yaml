@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./schema.json
+# yaml-language-server: $schema=https://ck642509.github.io/auto-manual-gen/schema/v1/manifest.json
 id: camera-add
 title: { zh-Hant: 新增攝影機, en: Adding a Camera }
 order: 50
