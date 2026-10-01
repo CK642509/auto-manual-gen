@@ -1,0 +1,26 @@
+# 不開瀏覽器就能做的檢查：型別、manifest 與正文、導覽資料有沒有重產、npm 套件裡包了什麼。
+# 截圖要跑 Electron / 字型要一致，那是另一條 workflow 的事（Day 23）。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # validate 的保護區要跟 HEAD 比
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci # postinstall 會順便編譯 packages/auto-manual-gen
+      - run: npm run typecheck
+      - run: npx auto-manual-gen validate
+      - run: npx auto-manual-gen tour --check
+      # 發布前先看清楚包了什麼：files 是白名單，多出一個不認識的檔案就該停下來看
+      - run: npm pack --dry-run -w auto-manual-gen

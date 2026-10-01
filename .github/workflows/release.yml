@@ -1,0 +1,29 @@
+# 發布 auto-manual-gen 到 npm：用 trusted publishing（OIDC），不在任何地方存 token。
+# 第一次使用前，要在 npmjs.com 的套件設定裡把這個 repo 與這支 workflow 加成 trusted publisher。
+#
+#   git tag auto-manual-gen@0.1.0 && git push origin auto-manual-gen@0.1.0
+name: release
+
+on:
+  push:
+    tags: ['auto-manual-gen@*']
+
+permissions:
+  contents: read
+  id-token: write # OIDC：向 npm 證明「這是從這個 repo 的這支 workflow 發出來的」
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@latest # trusted publishing 需要 npm 11.5+
+      - run: npm ci
+      - name: tag 的版號要跟 package.json 一致
+        run: test "auto-manual-gen@$(node -p "require('./packages/auto-manual-gen/package.json').version")" = "${GITHUB_REF_NAME}"
+      - run: npm pack --dry-run -w auto-manual-gen
+      - run: npm publish -w auto-manual-gen --provenance --access public
