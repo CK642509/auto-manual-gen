@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     // DOM 是給 page.evaluate 的回呼用的 —— 那些程式碼在瀏覽器裡執行（疊層、testid 盤點）
     "lib": ["ES2022", "DOM"],
     "strict": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
     "types": ["node"]
   },
-  // 只涵蓋範例專案自己的小工具；auto-manual-gen 本身有自己的 tsconfig（packages/auto-manual-gen）
-  "include": ["tools/**/*.ts"],
-  "exclude": ["node_modules", "apps", "packages"]
+  "include": ["src/**/*.ts"]
 }

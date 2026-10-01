@@ -5,31 +5,36 @@
   "type": "module",
   "description": "用 Playwright + AI Agent 打造使用手冊產線",
   "workspaces": [
+    "packages/*",
     "apps/*"
   ],
   "scripts": {
+    "postinstall": "npm run build -w auto-manual-gen",
+    "cli:build": "npm run build -w auto-manual-gen",
+    "cli:pack": "npm pack --dry-run -w auto-manual-gen",
     "demo": "npm run dev -w demo-stream-app",
     "demo:electron": "npm run electron -w demo-stream-app",
     "demo:build": "npm run build -w demo-stream-app",
-    "typecheck": "tsc --noEmit",
-    "manual": "tsx runner/run.ts",
-    "probe": "tsx runner/probe.ts",
-    "validate": "tsx runner/validate.ts",
-    "build": "tsx runner/build.ts",
-    "sync": "tsx runner/sync.ts",
-    "tour": "tsx runner/tour.ts",
-    "video": "tsx runner/video/record.ts",
+    "typecheck": "npm run typecheck -w auto-manual-gen && tsc --noEmit",
+    "doctor": "auto-manual-gen doctor",
+    "manual": "auto-manual-gen run",
+    "probe": "auto-manual-gen probe",
+    "validate": "auto-manual-gen validate",
+    "build": "auto-manual-gen build",
+    "sync": "auto-manual-gen sync",
+    "tour": "auto-manual-gen tour",
+    "video": "auto-manual-gen video",
     "terminal:shot": "tsx tools/terminal-shot.ts",
-    "driver:smoke": "tsx runner/drivers/smoke.ts"
+    "driver:smoke": "tsx tools/driver-smoke.ts"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
     "@types/node": "^24.13.4",
+    "auto-manual-gen": "^0.1.0",
     "playwright": "^1.63.0",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2",
-    "yaml": "^2.9.1"
+    "typescript": "^7.0.2"
   }
 }

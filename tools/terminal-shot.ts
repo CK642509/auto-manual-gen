@@ -10,7 +10,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { chromium } from 'playwright'
-import { repoRoot } from '../runner/config.js'
+import { fileURLToPath } from 'node:url'
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 const source = process.argv[2]
 if (!source) {

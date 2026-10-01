@@ -1,0 +1,47 @@
+{
+  "name": "auto-manual-gen",
+  "version": "0.1.0",
+  "description": "用 Playwright 驅動 App、依 manifest 產出截圖、Word / HTML / PDF 手冊、教學影片與 App 內導覽",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CK642509/auto-manual-gen.git",
+    "directory": "packages/auto-manual-gen"
+  },
+  "homepage": "https://github.com/CK642509/auto-manual-gen#readme",
+  "keywords": ["playwright", "electron", "documentation", "screenshot", "user-manual", "cli"],
+  "bin": {
+    "auto-manual-gen": "bin/auto-manual-gen.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema/v1/manifest.json": "./schema/v1/manifest.json",
+    "./schema/v1/manual.json": "./schema/v1/manual.json"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "schema/",
+    "assets/",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
