@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ck642509.github.io/auto-manual-gen/schema/v1/manual.json",
+  "title": "auto-manual-gen project (manual.yaml)",
+  "description": "手冊專案的根設定檔。auto-manual-gen 從目前目錄往上找這個檔案，找到的那一層就是手冊專案的根目錄，所有相對路徑都以它為基準。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "title", "version", "locales", "bootstrap", "app"],
+  "properties": {
+    "profile": { "type": "string", "minLength": 1, "description": "這本手冊拍的是哪一個產品（或哪一種形態），只用來顯示" },
+    "title": { "$ref": "#/definitions/localized", "description": "封面上的手冊名稱" },
+    "version": { "type": "string", "minLength": 1, "description": "封面上的版本號。日期與 commit 由 git 取得，不在這裡寫" },
+    "locales": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string" },
+      "description": "要出哪些語言，第一個是主語言：主語言正文放 docs/，其他語言放 docs/{locale}/。內建排版字串的有 zh-Hant 與 en"
+    },
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["viewport"],
+      "description": "每一章開始之前都要準備好的環境。每一章都重新開機、重新跑一次 bootstrap",
+      "properties": {
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 },
+            "deviceScaleFactor": { "type": "number", "minimum": 1, "description": "截圖的解析度倍率，預設 2。要從印刷需求往回推算" }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "啟動前注入 localStorage 的值（權限、版面……）。在第一次 navigation 之前注入，App 不會先閃一次預設狀態"
+        },
+        "localeKey": {
+          "type": "string",
+          "description": "App 從 localStorage 的哪個 key 讀語言。每個語言重跑一遍時，runner 把這個 key 換成該語言。locales 超過一個時必填"
+        },
+        "ready": {
+          "type": "string",
+          "description": "開機完成的信號：這個 testid 出現才開始執行 steps。沒寫就只等頁面 load"
+        },
+        "clock": { "type": "string", "description": "凍結時間（ISO 8601），畫面上的時鐘、相對時間每次都一樣" },
+        "disableAnimations": { "type": "boolean", "description": "注入一段 CSS 停用所有 animation 與 transition" }
+      }
+    },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "description": "怎麼把 App 啟動起來。個人環境不同的部分（例如 web.url）可以在不進版控的 config.json 裡覆寫",
+      "properties": {
+        "mode": { "enum": ["electron", "web", "custom"], "description": "預設的啟動方式；指令的 --mode 可以蓋過" },
+        "electron": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["projectDir"],
+          "properties": {
+            "projectDir": { "type": "string", "description": "Electron App 的目錄（有 package.json 與 main 的那一層）" },
+            "build": {
+              "type": ["string", "boolean"],
+              "description": "啟動前在 projectDir 執行的打包指令，例如 npm run build。手冊要拍的是打包後的樣子；false 或不寫就不打包"
+            }
+          }
+        },
+        "web": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url"],
+          "properties": { "url": { "type": "string", "description": "App 的網址。服務要自己先啟動，runner 不負責" } }
+        },
+        "custom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["driver"],
+          "properties": {
+            "driver": {
+              "type": "string",
+              "description": "自己寫的 driver 模組（.js / .mjs；Node 22.18+ 也可以直接用 .ts），default export 一個回傳 AppDriver 的函式"
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "都相對於 manual.yaml 所在的目錄",
+      "properties": {
+        "manifest": { "type": "string", "default": "manifest" },
+        "docs": { "type": "string", "default": "docs" },
+        "screenshots": { "type": "string", "default": "screenshots" },
+        "output": { "type": "string", "default": "output" },
+        "template": { "type": "string", "description": "Word 的樣式檔（pandoc reference.docx）。沒寫就用套件內建的" },
+        "css": { "type": "string", "description": "HTML 版的樣式。沒寫就用套件內建的" }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "messages": {
+          "type": "string",
+          "description": "App 的 i18n 檔（扁平的 key: 文字 JSON），{locale} 會換成語言代碼。validate 拿它比對正文裡的名稱有沒有出處；沒寫就跳過這項檢查"
+        }
+      }
+    },
+    "tour": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output"],
+      "properties": {
+        "output": { "type": "string", "description": "tour 指令產生的導覽資料要寫到哪裡（通常在 App 的原始碼裡，跟著 App 一起打包）" }
+      }
+    }
+  },
+  "definitions": {
+    "localized": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string", "minLength": 1 } }
+      ]
+    }
+  }
+}

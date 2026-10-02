@@ -17,9 +17,11 @@ npm run demo            # Web 模式，vite dev server，http://localhost:5173�
 npm run demo:electron   # Electron 模式（先 vite build 再 electron .）
 npm run demo:build      # 只 build，產物在 apps/demo-stream-app/dist/
 
+npm run doctor                                 # 檢查環境：Playwright / pandoc / ffmpeg / Word / TTS
 npm run manual                                 # 跑整本 manifest × manual.yaml 的所有 locales，產出 screenshots/{locale}/
-npm run manual -- --chapter <id> --mode web    # 局部重跑；--mode 蓋過 config 的 app.mode
+npm run manual -- --chapter <id> --mode web    # 局部重跑；--mode 蓋過 manual.yaml 的 app.mode
 npm run manual -- --locale en                  # 只跑一個語言（validate / build / probe 也吃 --locale）
+npm run validate                               # 不開瀏覽器：manifest 的 schema 與命名、正文的引用與保護區
 
 npm run build                     # 合併 docs/ 與截圖，pandoc 產出 output/{locale}/manual.docx（需要 pandoc）
 npm run build -- --pdf            # 再用 Word COM 更新目錄並轉 PDF（只能在裝有 Word 的 Windows）
@@ -28,29 +30,34 @@ npm run build -- --to html --pdf  # 單檔 HTML（templates/manual.css）+ Playw
 npm run sync -- --locale en       # 主語言正文改了哪幾段、譯文要重翻哪幾段（docs/{locale}/*.sync.json）
 npm run sync -- --locale en --accept <id>  # 譯文翻好後記下段落對照；要求兩邊段落一對一
 
-npm run tour              # 標了 tour: true 的章節 -> apps/demo-stream-app/src/renderer/help/tours.json（App 內導覽，進版控）
+npm run tour              # 標了 tour: true 的章節 -> manual.yaml 的 tour.output（App 內導覽，進版控）
 npm run tour -- --check   # 只比對；manifest / 正文改了但 tours.json 沒重產就失敗
 
-npm run typecheck       # tsc --noEmit，涵蓋 runner/ 與 tools/
-npm run driver:smoke               # driver 煙霧測試，走 config 的 app.mode
+npm run cli:build         # 改了 packages/auto-manual-gen/src/ 之後要重新編譯（npm install 時會自動編一次）
+npm run cli:pack          # npm pack --dry-run：看發布出去的套件包了哪些檔案
+npm run typecheck         # 套件本身 + tools/
+npm run driver:smoke               # driver 煙霧測試，走 manual.yaml 的 app.mode
 npm run driver:smoke -- --mode web # 指定形態（web 模式要先開著 npm run demo）
 ```
 
-Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev server，沒有就載 `dist/index.html`。**產線（Playwright）一律走後者** —— 手冊要拍的是打包後的樣子，所以驅動 Electron 前必須先 build。
+這些 npm script 都只是轉給 `auto-manual-gen` CLI（`npm run manual` = `npx auto-manual-gen run`）。直接呼叫 CLI 時每個指令都吃 `--json`。
 
-尚未建立 lint / test / CI。`.github/workflows/` 是空的（規劃中：`manual.yml`）；`runner/` 目前有 `drivers/`、`config.ts` 與 `run.ts`（動詞集還擠在 `run.ts` 裡，之後要拆進 `actions/` / `capture/` / `overlay/`），`manifest/` 有一本五章的示範手冊，`agent/` 有 UI-MAP / QUIRKS / STYLE 與 few-shot 範例，`docs/` 有兩章正文範例，`plugin/` 還只有 `.gitkeep`。
+Electron main process 讀 `VITE_DEV_SERVER_URL` 環境變數：有值就載 dev server，沒有就載 `dist/index.html`。**產線（Playwright）一律走後者** —— 手冊要拍的是打包後的樣子，所以 `manual.yaml` 的 `app.electron.build` 設成 `npm run build`，第一章開機前先打包。
 
-產物一律不進版控：`screenshots/{locale}/`（手冊要用的圖，一個語言一個資料夾，裡面扁平放置、檔名前綴就是章節 id）與 `output/{locale}/`（最終文件；`failures/{locale}/{id}/` 放失敗現場）都在 `.gitignore` 裡。
+CI：`.github/workflows/ci.yml`（typecheck、validate、tour --check、npm pack --dry-run）；`release.yml` 在推 `auto-manual-gen@x.y.z` tag 時用 npm trusted publishing 發布。
 
-runner 的程式碼是 ESM TypeScript，用 `tsx` 直接跑，不編譯（根目錄 `package.json` 的 `"type": "module"` 是為此而設）。
+產物一律不進版控：`screenshots/{locale}/`（手冊要用的圖，一個語言一個資料夾，裡面扁平放置、檔名前綴就是章節 id）與 `output/{locale}/`（最終文件；`failures/{locale}/{id}/` 放失敗現場）都在 `.gitignore` 裡。`packages/auto-manual-gen/dist/` 是編譯產物，也不進版控。
 
 ## 這個 repo 是什麼
 
 用 Playwright + AI Agent 打造的使用手冊產線：驅動 App → 截圖 → 畫框標號 → 遮蔽機敏資訊 → 合併正文 → 產出 Word/PDF。
 
-**現況是骨架階段。** `apps/demo-stream-app` 可以跑，`runner/drivers/` 的 `AppDriver`（Electron / Web 兩個實作）已經接上 Playwright，其餘目錄尚未實作 —— 新增檔案前先確認它屬於下面「架構的三個主軸」的哪一塊。
+repo 分成兩部分：
 
-**repo 根目錄本身就是一本手冊專案**（`manifest/` + `docs/` + `fixtures/` + `templates/` + `config.json`），不是一個 monorepo；`apps/demo-stream-app` 是被拍的靶，實務上應該是另一個 repo，放在這裡只是為了方便展示。
+- **`packages/auto-manual-gen/`**：產線本體，一個可以發布到 npm 的 CLI（ESM TypeScript，`tsc` 編譯到 `dist/`）。**它不能知道 DemoStreamApp 的存在** —— 任何跟示範 App 有關的路徑、testid、檔名都要放進 `manual.yaml`，`grep -rn demo-stream-app packages/auto-manual-gen/src` 必須找不到東西。使用者的路徑一律以 `project().root`（往上找到 `manual.yaml` 的那一層）為基準；套件自己附帶的檔案（schema、`.ps1`、預設樣式）用 `paths.ts` 的 `packageRoot` / `asset()`，兩者不能混用。
+- **repo 根目錄本身就是一本使用它的手冊專案**（`manual.yaml` + `manifest/` + `docs/` + `fixtures/` + `templates/`），透過 npm workspace 依賴 `auto-manual-gen`，用法跟外部使用者 `npm install -D auto-manual-gen` 一樣。`apps/demo-stream-app` 是被拍的靶，實務上應該是另一個 repo，放在這裡只是為了方便展示。
+
+設定分兩層：`manual.yaml`（專案共用、進版控，schema 在 `packages/auto-manual-gen/schema/v1/manual.json`）與 `config.json`（一人一份、不進版控，只能覆寫 `app`）。
 
 ## 架構的三個主軸
 
@@ -61,13 +68,15 @@ runner 的程式碼是 ESM TypeScript，用 `tsx` 直接跑，不編譯（根目
 判準：*AI 的輸出會不會被凍結成可審查的產物，或被決定性機制驗證？* 不會的話就不該讓 AI 做。
 
 具體對應：
-- `runner/` —— 純執行者，讀 manifest 驅動 App，**不做任何判斷**。`cli.ts` 的 `probe` / `run` / `validate` 三個指令合起來就是 agent 的自我驗證迴圈
-- `manifest/schema.json` —— manifest 刻意**不提供條件判斷、迴圈、變數**。一旦圖靈完備就無法 review，而「產出可被人審查」是選宣告式的全部理由。表達不了的操作走逃生門 `action: custom` 指向一支小 `.ts`，逃生門的使用數量要進 lint 報告
+- `packages/auto-manual-gen/` —— 純執行者，讀 manifest 驅動 App，**不做任何判斷**。`probe` / `validate` / `run` 三個指令合起來就是 agent 的自我驗證迴圈
+- `packages/auto-manual-gen/schema/v1/manifest.json` —— manifest 刻意**不提供條件判斷、迴圈、變數**。一旦圖靈完備就無法 review，而「產出可被人審查」是選宣告式的全部理由。`validate` 的結構檢查就是用這份 schema（ajv），跟編輯器同源；schema 表達不了的語意檢查（檔名一致、id 重複、截圖命名）才手寫。表達不了的啟動流程走自訂 driver（`app.mode: custom`）
 - `agent/` —— 給 AI 的上下文（UI-MAP / STYLE / QUIRKS / few-shot），以及 `diff-pairs/` 這組已知答案的圖對
 
 ### 2. 對 agent 友善的介面
 
-CLI 與 runner 的輸出要**結構化**，錯誤訊息要說「你可以怎麼修」。不能只說「找不到元素」，要說「找不到 X，可用的有 A / B / C」。失敗時要留下線索：整頁截圖 + DOM dump + step index + 該畫面可用的 testid 清單。
+CLI 的輸出要**結構化**，錯誤訊息要說「你可以怎麼修」。不能只說「找不到元素」，要說「找不到 X，可用的有 A / B / C」。失敗時要留下線索：整頁截圖 + DOM dump + step index + 該畫面可用的 testid 清單。
+
+失敗一律丟 `errors.ts` 的 `ManualError`（`contentError` / `usageError` / `envError`），不要在指令裡 `process.exit`。`cli.ts` 統一把它轉成 exit code（1 內容 / 2 用法或設定 / 3 環境）與 `--json` 輸出；`details` 裡放給機器讀的線索（候選 testid、失敗現場路徑）。進度訊息用 `ui.ts`，`--json` 時會自動安靜。外部程式（pandoc、打包指令）的輸出導到 stderr，stdout 只留給 JSON。
 
 `probe` 指令（印出當前畫面所有可見且具 testid 的元件 + 文字 + boundingBox）是餵給 agent 的關鍵素材。
 
@@ -77,7 +86,7 @@ CLI 與 runner 的輸出要**結構化**，錯誤訊息要說「你可以怎麼�
 manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{locale}/{id}-NN.png
 ```
 
-多語言：`manual.yaml` 的 `locales` 第一個是主語言，正文放 `docs/`；其他語言放 `docs/{locale}/`。manifest 裡會跟著語言變的欄位（title / legend / fill 的 text）寫成 `{ zh-Hant: ..., en: ... }`，一律用 `manifest.ts` 的 `pick()` 取值；缺翻譯直接失敗，不退回主語言。build 自己寫進文件的字（圖號、表頭、封面）在 `build.ts` 的 `STRINGS`。
+多語言：`manual.yaml` 的 `locales` 第一個是主語言，正文放 `docs/`；其他語言放 `docs/{locale}/`。manifest 裡會跟著語言變的欄位（title / legend / fill 的 text）寫成 `{ zh-Hant: ..., en: ... }`，一律用 `manifest.ts` 的 `pick()` 取值；缺翻譯直接失敗，不退回主語言。App 從 `bootstrap.localeKey` 指定的 localStorage key 讀語言。build 自己寫進文件的字（圖號、表頭、封面）在 `commands/build.ts` 的 `STRINGS`。
 
 `order` 用 10 的倍數編號，中間留空間插入章節。
 
@@ -115,7 +124,7 @@ manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{l
 | 巢狀對話框 | `confirm-dialog` 疊在 `camera-dialog` 之上 | 決定拍哪一層；離開章節時兩層都要關 |
 | 清單長到需要捲動 | `camera-list`（15 台） | 捲動後 `boundingBox` 必須重取；長清單只拍前幾列 |
 
-`style.css` 有 `.no-motion` class 當 hook，掛到 `<html>` 就會停掉所有動畫與轉場。
+`style.css` 有 `.no-motion` class，掛到 `<html>` 就會停掉所有動畫與轉場（示範用；產線的 `disableAnimations` 是直接注入一段同樣效果的 CSS，不依賴這個 class）。
 
 ### 狀態注入
 
@@ -150,6 +159,7 @@ localStorage.setItem('settings', '{"face":{"enabled":true,"threshold":75}}')
 ## 其他慣例
 
 - **`.gitattributes` 強制 LF**（開發在 Windows、CI 跑 Linux 容器），圖片 / 影片 / docx / pdf 一律 binary。
-- 產物不進版控：`output/*`、`config.json`（一人一份，只有 `config.example.json` 進版控）、`*.webm`、`*.mp4`（錄影走 release assets）。
+- 產物不進版控：`output/*`、`config.json`（一人一份，只有 `config.example.json` 進版控）、`*.webm`、`*.mp4`（錄影走 release assets）、`packages/auto-manual-gen/dist/`。
+- `auto-manual-gen` 的公開介面（指令與選項、兩份 schema、`--json` 格式、exit code 與 `error.code`）有不相容的變更就升主版號，並寫進 `packages/auto-manual-gen/CHANGELOG.md`。
 - Commit 用 `feat:` / `fix:` 前綴 + 中文標題，body 用條列說明改了什麼與為什麼。
 - `agent/` 這個目錄本身會過期，要跟著 code 一起改 —— 它在 code review 檢查清單上。

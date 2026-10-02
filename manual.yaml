@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://ck642509.github.io/auto-manual-gen/schema/v1/manual.json
+#
+# 手冊專案的根設定檔。auto-manual-gen 從目前目錄往上找這個檔案，找到的那一層就是手冊專案的根目錄。
+# 章節各自一個檔案：manifest/{order}-{id}.yaml。
+# 個人環境不同的部分（例如 web.url）寫在不進版控的 config.json，只能覆寫 app。
+profile: demo-stream-app
+title: { zh-Hant: DemoStreamApp 使用手冊, en: DemoStreamApp User Manual }
+version: 'v1.2.0'
+
+# 要出哪些語言，第一個是主語言（Day 22）。
+# 語言不寫在 bootstrap.storage 裡：runner 逐語言把 localeKey 這個 key 換成該語言，同一份 manifest 重跑一遍。
+locales: [zh-Hant, en]
+
+bootstrap:
+  viewport: { width: 1600, height: 900, deviceScaleFactor: 2 }
+  # 狀態注入在第一次 navigation 之前發生（Day 09）
+  storage:
+    role: operator
+    layout: '{"mode":"2x2","cells":[null,null,null,null]}'
+  localeKey: locale
+  # 這個 testid 出現才算開機完成
+  ready: app-root
+  clock: '2025-09-01T09:00:00'
+  disableAnimations: true
+
+# 怎麼把 App 啟動起來。指令的 --mode 可以臨時蓋過 mode。
+app:
+  mode: electron
+  electron:
+    projectDir: apps/demo-stream-app
+    # 第一章開機前先打包：手冊要拍的是打包後的樣子
+    build: npm run build
+  web:
+    url: http://localhost:5173
+
+# 範例專案的樣式檔是自訂過的（tools/style-reference-docx.ps1）；沒寫的話會用套件內建的
+paths:
+  template: templates/reference.docx
+  css: templates/manual.css
+
+# validate 拿 App 的 i18n 檔比對正文裡「」與粗體標出的名稱有沒有出處（Day 19）
+text:
+  messages: apps/demo-stream-app/src/renderer/locales/{locale}.json
+
+# tour 指令的產物：要跟著 App 一起打包，所以寫進 App 的原始碼裡（Day 26）
+tour:
+  output: apps/demo-stream-app/src/renderer/help/tours.json

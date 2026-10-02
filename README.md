@@ -11,27 +11,42 @@ AI 只負責**產生之後由機器重複執行的東西** —— 寫 manifest�
 
 判準一句話：*AI 的輸出會不會被凍結成可審查的產物，或被決定性機制驗證？*
 
+## 這個 repo 裡有什麼
+
+產線本身是一個 npm 套件 **[`auto-manual-gen`](packages/auto-manual-gen/)**（CLI），repo 的其餘部分就是「一個使用它的手冊專案」：
+
+| 位置 | 是什麼 |
+|---|---|
+| [`packages/auto-manual-gen/`](packages/auto-manual-gen/) | CLI 本體：`init` `doctor` `probe` `validate` `run` `build` `sync` `video` `tour`。**要用在自己的專案，從[這份 README](packages/auto-manual-gen/README.md) 開始** |
+| `manual.yaml` + `manifest/` + `docs/` | 範例手冊專案：DemoStreamApp 的五章手冊（中英文） |
+| `apps/demo-stream-app/` | 被拍的靶：Electron + Vue 3 的示範 App |
+| `agent/` | 給 AI agent 的上下文（UI-MAP / QUIRKS / STYLE / few-shot） |
+
 ## Quickstart
 
 需要 Node 20+。
 
 ```bash
-npm install
+npm install             # 會順便編譯 packages/auto-manual-gen
 
 npm run demo            # Web 模式，開 http://localhost:5173
 npm run demo:electron   # Electron 模式（會先 build 再啟動）
 ```
 
-跑產線本身：
+跑產線本身（`npm run manual` 就是 `auto-manual-gen run`，其他 npm script 也都只是轉給 CLI）：
 
 ```bash
+npm run doctor                             # 檢查環境：pandoc、ffmpeg、Word、TTS 有沒有裝
 npm run manual                             # 整本 manifest × 所有語言，產出 screenshots/{locale}/
 npm run manual -- --locale en              # 只跑一個語言
 npm run manual -- --chapter layout-preset  # 只重跑一章
 npm run manual -- --mode web               # 指定形態（web 要另開終端機跑 npm run demo）
+npx auto-manual-gen run --json             # 直接呼叫 CLI 也可以；--json 給 CI 與 agent 用
 ```
 
-形態預設讀 `config.json` 的 `app.mode`（範本是 `electron`，會自己先 build，不必另外開服務）。
+形態預設讀 `manual.yaml` 的 `app.mode`（`electron`，會自己先 build，不必另外開服務）。
+想固定用 Web 模式，把 `config.example.json` 複製成 `config.json`（只能覆寫 `app`，不進版控）。
+改了 `packages/auto-manual-gen/src/` 之後要 `npm run cli:build` 重新編譯。
 
 ### 重現 Day 15 那次失敗
 
@@ -55,7 +70,7 @@ npm run manual -- --chapter layout-preset --mode web  # 只重跑那一章
 ### 重現 Day 17 那次 AI Agent 加一章
 
 Day 17 讓 agent 讀 `agent/UI-MAP.md`、`agent/QUIRKS.md`、`apps/demo-stream-app/TESTID.md`
-與 `manifest/schema.json`，寫出 `manifest/50-camera-add.yaml`。這個分支把**人工審查前**
+與 manifest 的 schema（現在在 `packages/auto-manual-gen/schema/v1/manifest.json`），寫出 `manifest/50-camera-add.yaml`。這個分支把**人工審查前**
 與**微調後**兩個版本都留著，對應文章裡的兩張 diff：
 
 ```bash
@@ -108,7 +123,7 @@ npm run build                 # output/{locale}/manual.md + manual.docx
 npm run build -- --pdf        # 再用 Word 更新目錄頁碼、轉出 manual.pdf（需要 Windows + Word）
 ```
 
-封面的版本號取自 `manifest/manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
+封面的版本號取自 `manual.yaml`，日期與 commit 取自 git，不在任何地方手寫。
 `templates/reference.docx` 是 pandoc 預設樣式檔改出來的，改了哪些樣式寫在 `tools/style-reference-docx.ps1`。
 
 ### 重現 Day 21 的 HTML 版與不靠 Office 的 PDF
@@ -125,7 +140,7 @@ npm run build -- --to html --pdf    # 再用 Playwright 的 Chromium 印成 manu
 
 ### 重現 Day 22 的多語言手冊
 
-`manifest/manual.yaml` 的 `locales: [zh-Hant, en]` 決定要出哪些語言，第一個是主語言。
+`manual.yaml` 的 `locales: [zh-Hant, en]` 決定要出哪些語言，第一個是主語言。
 runner 逐語言把 `locale` 注入 localStorage，同一份 manifest 重跑一遍 —— 截圖本身不用改任何設定。
 
 會跟著語言變的欄位（章節標題、legend、示範輸入值）在 manifest 裡寫成 `{ zh-Hant: ..., en: ... }`，
@@ -183,12 +198,12 @@ npm run video -- --chapter layout-preset   # 沒標 video: true 的章節也可�
 ```
 
 錄影用 Playwright 新版的 `page.screencast`（本專案用 1.63），開機（含狀態注入後的 reload）做完才開始錄。
-畫面上的游標是 `runner/overlay/cursor.ts` 畫上去的假游標；截圖的位置改成停下來畫上同一套標註，並把 `clip` 以外調暗。
+畫面上的游標是 `packages/auto-manual-gen/src/overlay/cursor.ts` 畫上去的假游標；截圖的位置改成停下來畫上同一套標註，並把 `clip` 以外調暗。
 執行紀錄在 `tools/logs/day24-video.txt`。
 
 ### 重現 Day 25 的字幕與旁白
 
-字幕不另外寫：內容取自正文的編號步驟、legend 與「完成後」的第一段（`runner/video/captions.ts`）。
+字幕不另外寫：內容取自正文的編號步驟、legend 與「完成後」的第一段（`packages/auto-manual-gen/src/video/captions.ts`）。
 正文跟 manifest 都有同名的截圖，先用截圖把兩邊切段，再在每一段裡把編號步驟配對到會動的 step。
 錄影時記下每個 step 的時間（`output/video/{locale}/{id}.timeline.json`），字幕的時間就從這裡來。
 
@@ -214,9 +229,37 @@ npm run tour -- --check    # manifest / 正文改了但 tours.json 沒重產，�
 npm run demo               # 開 App，按右上角的「?」
 ```
 
-`tours.json` 是產物，但它要跟著 App 一起打包，所以跟 i18n 檔一樣進版控。
-依賴示範資料的章節（例如雙擊 `camera-row_lobby-01` 的「即時監控畫面」）標上 `tour: true` 會直接被擋下來。
+`tours.json` 是產物，但它要跟著 App 一起打包，所以跟 i18n 檔一樣進版控（路徑寫在 `manual.yaml` 的 `tour.output`）。
+依賴示範資料的章節（例如雙擊 `camera-row_lobby-01` 的「即時監控畫面」）不要標 `tour: true` —— 使用者的畫面上不一定有那台攝影機。
 執行紀錄在 `tools/logs/day26-tour.txt`。
+
+### 重現 Day 27 的 CLI
+
+產線從 `runner/` 抽成了 `packages/auto-manual-gen/`，這個 repo 改成透過 npm workspace 使用它，跟別人 `npm install -D auto-manual-gen` 的用法一樣。
+
+在任何一個空資料夾試 `init`（另一個終端機開著 `npm run demo`）：
+
+```bash
+mkdir /tmp/my-manual && cd /tmp/my-manual
+npx --prefix <這個 repo 的路徑> auto-manual-gen init --url http://localhost:5173
+npx --prefix <這個 repo 的路徑> auto-manual-gen run     # -> screenshots/zh-Hant/overview-01.png
+```
+
+exit code 與 `--json`：拿 Day 15 那次失敗來試，看 agent 與 CI 會收到什麼。
+
+```bash
+git checkout day15-before-fix -- manifest/30-layout-preset.yaml
+npx auto-manual-gen run --chapter layout-preset --mode web --locale zh-Hant --json   # exit 1，error.code = SELECTOR_NOT_FOUND
+git checkout HEAD -- manifest/30-layout-preset.yaml
+
+npx auto-manual-gen validate --chapter nope        # exit 2：參數錯了，列出可用的章節
+npx auto-manual-gen build                          # 沒裝 pandoc 的話 exit 3
+npx auto-manual-gen doctor                         # 哪些能力可以用、缺什麼
+
+npm run cli:pack                                   # npm pack --dry-run：發布出去的套件裡到底有哪些檔案
+```
+
+CLI 的完整說明（指令、`manual.yaml` 欄位、manifest 動詞、自訂 driver）在 [`packages/auto-manual-gen/README.md`](packages/auto-manual-gen/README.md)。
 
 ### 這個靶長什麼樣子
 
@@ -259,25 +302,24 @@ localStorage.clear()                    // 復原
 
 ## 目錄結構
 
-repo 根目錄**本身就是一本手冊專案**：`manifest/` 是唯一的人為真相來源，
-`runner/` 讀它、驅動 App、逐語言產出 `screenshots/{locale}/`，再與 `docs/` 的正文合流成 `output/{locale}/`。
+repo 根目錄**本身就是一本手冊專案**：`manual.yaml` 標出專案的根目錄，`manifest/` 是唯一的人為真相來源，
+`auto-manual-gen` 讀它、驅動 App、逐語言產出 `screenshots/{locale}/`，再與 `docs/` 的正文合流成 `output/{locale}/`。
 
 ```
 auto-manual/
+├─ manual.yaml             # 專案設定：語言、bootstrap、怎麼啟動 App、各種路徑（進版控）
+├─ config.example.json     # 個人環境範本（實際的 config.json 一人一份、不進版控，只能覆寫 app）
 ├─ manifest/               # 章節、步驟、標註 —— 唯一的人為真相來源
-│  ├─ schema.json          #   manifest 的 JSON Schema
-│  ├─ manual.yaml          #   profile + bootstrap（每一章開始前都要準備好的環境）
 │  └─ 20-live-monitor.yaml #   一章一個檔案，{order}-{id}.yaml
 ├─ docs/                   # 正文（AI 生成 + 人工保護區），檔名與章節 id 對齊
 │  ├─ 10-overview.md       #   主語言（manual.yaml 的 locales 第一個）
 │  ├─ 20-live-monitor.md
 │  └─ en/                  #   其他語言各一個資料夾，檔名相同
 ├─ fixtures/               # 固定假資料，讓畫面每次都長一樣
-├─ config.example.json     # 環境設定範本（實際的 config.json 一人一份，不進版控）
-├─ templates/              # reference.docx，排版樣式與內容分離（pandoc 只讀它的樣式，不讀內容）
-├─ runner/                 # 執行邏輯：drivers / actions / capture / overlay / video / probe / cli
-│  └─ run.ts               #   讀 manifest 驅動 App，一章一次開機（npm run manual）
-├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染）
+├─ templates/              # 自訂過的 reference.docx 與 manual.css（沒有的話會用套件內建的）
+├─ packages/
+│  └─ auto-manual-gen/     # 產線本體（npm 套件）：src/、schema/v1/、assets/
+├─ tools/                  # 跟產線無關的小工具（文章插圖、log 渲染、driver 煙霧測試）
 ├─ screenshots/{locale}/   # 產線拍出來的圖（含標註），一個語言一個資料夾，不進版控
 ├─ output/{locale}/        # 最終的 manual.docx / manual.pdf / manual.html
 │  └─ failures/{locale}/{id}/ # 失敗現場：整頁截圖 + DOM dump，只給除錯用
@@ -306,10 +348,9 @@ manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{l
 
 ## 現況
 
-🚧 骨架階段。`apps/demo-stream-app` 與 `runner/`（`drivers/` + `run.ts` + `probe.ts` + `validate.ts`）
-可以跑，`manifest/` 有一本五章的示範手冊（含 schema.json），`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md`
-與兩章 manifest few-shot 範例，`docs/` 五章都有正文；`plugin/` 還只有 `.gitkeep`。
-正文用 `{{legend.<key>}}` 與 `{{screenshot:<name>}}` 引用 manifest，`validate` 會檢查這些引用與人工保護區，`build` 把它們合併成 Word / HTML / PDF。
+`packages/auto-manual-gen` 已經可以發布（`npm run cli:pack` 看內容，`.github/workflows/release.yml` 用 trusted publishing 發布），
+`manifest/` 有一本五章的示範手冊，`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md` 與兩章 manifest few-shot 範例，
+`docs/` 五章都有中英文正文；`plugin/` 還只有 `.gitkeep`（Day 28）。
 
 ## 授權
 
