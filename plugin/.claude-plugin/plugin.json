@@ -1,0 +1,10 @@
+{
+  "name": "manual",
+  "displayName": "Auto Manual",
+  "version": "0.1.0",
+  "description": "用 auto-manual-gen 產生與維護使用手冊的 skills 與 agents",
+  "author": { "name": "CK642509" },
+  "repository": "https://github.com/CK642509/auto-manual-gen",
+  "license": "MIT",
+  "keywords": ["documentation", "user-manual", "playwright", "screenshot"]
+}

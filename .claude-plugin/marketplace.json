@@ -1,0 +1,8 @@
+{
+  "name": "auto-manual-gen",
+  "description": "auto-manual-gen 的 Claude Code plugin",
+  "owner": { "name": "CK642509" },
+  "plugins": [
+    { "name": "manual", "source": "./plugin", "description": "用 auto-manual-gen 產生與維護使用手冊" }
+  ]
+}
