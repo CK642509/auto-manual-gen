@@ -2,39 +2,50 @@
 id: camera-add
 title: { zh-Hant: 新增攝影機, en: Adding a Camera }
 order: 50
-# 同一份 steps 也錄成教學影片（Day 24）
-video: true
-# 也做成 App 內導覽（Day 26）
-tour: true
 
 steps:
+  # camera-add 在骨架屏階段就能點，但那時建立的資料會被載入結果覆寫，一定要先等清單載完
   - { action: waitFor, testid: camera-list-skeleton, state: detached }
   - { action: waitFor, testid: camera-list }
+
+  - action: screenshot
+    name: camera-add-01
+    clip: { testid: camera-panel, padding: 12 }
+    annotate:
+      - { key: add, testid: camera-add, legend: { zh-Hant: 新增攝影機, en: Add Camera } }
 
   - { action: click, testid: camera-add }
   - { action: waitFor, testid: camera-dialog }
 
-  - action: screenshot
-    name: camera-add-01
-    clip: { testid: camera-dialog, padding: 12 }
-    annotate:
-      - { key: name, testid: camera-dialog-name, badge: left, legend: { zh-Hant: 顯示名稱, en: Display Name } }
-      - { key: zone, testid: camera-dialog-zone, badge: left, legend: { zh-Hant: 安裝位置, en: Installation Zone } }
-      - { key: source, testid: camera-dialog-source, badge: left, legend: { zh-Hant: RTSP 位址, en: RTSP URL } }
-      - { key: enabled, testid: camera-dialog-enabled, legend: { zh-Hant: 啟用推論, en: Enable inference } }
+  # 名稱用英數字，兩種語言推導出的 id 都是 gate-west（中文名稱會變成通用的 camera）
+  - { action: fill, testid: camera-dialog-name, text: { zh-Hant: Gate West, en: Gate West } }
+  # RTSP 欄空白時 placeholder 會露出內網 IP，先填文件專用位址（192.0.2.0/24）再截圖；帳號密碼不填
+  - { action: fill, testid: camera-dialog-source, text: rtsp://192.0.2.10/live }
 
-  - { action: fill, testid: camera-dialog-name, text: { zh-Hant: 大門西側, en: Gate West } }
-  - { action: fill, testid: camera-dialog-source, text: 'rtsp://192.0.2.10/live' }
-
+  # 安裝位置是原生 <select>，manifest 沒有對應動詞，維持預設的「大門」
   - action: screenshot
     name: camera-add-02
     clip: { testid: camera-dialog, padding: 12 }
     annotate:
+      - { key: name, testid: camera-dialog-name, legend: { zh-Hant: 顯示名稱, en: Display Name }, badge: left }
+      - { key: zone, testid: camera-dialog-zone, legend: { zh-Hant: 安裝位置, en: Installation Zone }, badge: left }
+      - { key: source, testid: camera-dialog-source, legend: { zh-Hant: RTSP 位址, en: RTSP URL }, badge: left }
+      - { key: enabled, testid: camera-dialog-enabled, legend: { zh-Hant: 啟用推論, en: Enable inference } }
       - { key: confirm, testid: camera-dialog-confirm, legend: { zh-Hant: 建立, en: Create } }
 
   - { action: click, testid: camera-dialog-confirm }
-  - { action: waitFor, testid: toast }
 
+  # toast 3 秒後消失，等到之後立刻截圖，中間不要插入其他步驟
+  - { action: waitFor, testid: toast }
   - action: screenshot
     name: camera-add-03
     clip: { testid: toast-host, padding: 12 }
+
+  # 新的攝影機加在清單最底部，超出可見區域，要先捲動
+  - { action: scroll, testid: camera-row_gate-west }
+  - action: screenshot
+    name: camera-add-04
+    clip: { testid: camera-panel, padding: 12 }
+    annotate:
+      - { key: row, testid: camera-row_gate-west, legend: { zh-Hant: 新增的攝影機, en: Newly added camera } }
+      - { key: count, testid: camera-count, legend: { zh-Hant: 攝影機總數, en: Total cameras }, badge: left }
