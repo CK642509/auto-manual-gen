@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# 用專案自己裝的版本，確保 agent、人、CI 跑的是同一版
+exec npx --no-install auto-manual-gen "$@"

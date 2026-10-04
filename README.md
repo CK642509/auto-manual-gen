@@ -261,6 +261,54 @@ npm run cli:pack                                   # npm pack --dry-run：發布
 
 CLI 的完整說明（指令、`manual.yaml` 欄位、manifest 動詞、自訂 driver）在 [`packages/auto-manual-gen/README.md`](packages/auto-manual-gen/README.md)。
 
+### 重現 Day 29 的 Claude Code plugin
+
+`plugin/` 是 Claude Code plugin `manual`，把 Day 16–19 的知識、Day 17 的 prompt 與自動 validate 打包在一起；
+`.claude-plugin/marketplace.json` 讓這個 repo 同時也是一個 marketplace。plugin 不帶 CLI，
+`bin/auto-manual` 轉接到專案自己裝的 `auto-manual-gen`，所以要先 `npm install`。
+
+開發與試用不需要安裝，在 repo 根目錄用 `--plugin-dir` 載入這一次的 session 就好：
+
+```bash
+npm install
+claude --plugin-dir ./plugin
+```
+
+進到 Claude Code 之後：
+
+```text
+/manual:add-chapter 如何新增一台攝影機    # 探勘 → 寫 manifest → validate → run，跑通就停下來給人 review
+/manual:audit                            # UI 改版後檢查整本手冊，只回報、不修改
+/manual:audit camera-add                 # 只檢查一章
+```
+
+要重跑 Day 17 那一章，先把 `manifest/50-camera-add.yaml` 與兩個語言的正文（`docs/50-camera-add.md`、`docs/en/50-camera-add.md`）移走，
+不然 agent 會直接參考既有的答案。文章裡那次重跑的結果留在 `test/plugin` 分支。
+`manual.yaml` 的 `app.mode` 是 `electron`，CLI 會自己 build 並啟動 App；想用 Web 模式，就照 Quickstart 設定 `config.json` 並另開終端機跑 `npm run demo`。
+
+hook 可以單獨試：請 agent 把某一章 manifest 的 `action` 改成 `tap`，存檔之後它就會收到 validate 的錯誤。
+
+檢查與本機試裝（模擬使用者從 marketplace 安裝的結果）：
+
+```bash
+claude plugin validate ./plugin            # 驗 plugin；CI 可以加 --strict
+claude plugin validate .                   # 驗 marketplace
+claude --plugin-dir ./plugin plugin details manual   # 元件清單與每一輪的 token 成本，不用安裝
+
+claude plugin marketplace add ./ --scope local
+claude plugin install manual@auto-manual-gen --scope local
+
+claude plugin uninstall manual@auto-manual-gen --scope local
+claude plugin marketplace remove auto-manual-gen
+```
+
+在自己的專案使用（專案裡要先 `npm install -D auto-manual-gen`）：
+
+```text
+/plugin marketplace add CK642509/auto-manual-gen
+/plugin install manual@auto-manual-gen
+```
+
 ### 這個靶長什麼樣子
 
 DemoStreamApp 是一個虛構的 AI 影像串流監控台，兩個分頁：
@@ -325,7 +373,8 @@ auto-manual/
 │  └─ failures/{locale}/{id}/ # 失敗現場：整頁截圖 + DOM dump，只給除錯用
 ├─ agent/                  # 給 AI agent 的上下文（UI-MAP / STYLE / QUIRKS / few-shot）
 │  └─ diff-pairs/          #   已知答案的圖對，檢驗 AI 差異判讀
-├─ plugin/                 # Claude Code plugin
+├─ .claude-plugin/         # marketplace.json：讓這個 repo 本身就是一個 marketplace
+├─ plugin/                 # Claude Code plugin `manual`：skills / agents / hooks / bin
 └─ apps/demo-stream-app/   # 靶：範例 App，Electron + Vue 3，同一份也能純 Web 跑
    └─ TESTID.md            #   命名規範 —— 同時給人看與給 agent 看
 ```
@@ -350,7 +399,7 @@ manifest 的章節 id  ↔  docs/[{locale}/]{order}-{id}.md  ↔  screenshots/{l
 
 `packages/auto-manual-gen` 已經可以發布（`npm run cli:pack` 看內容，`.github/workflows/release.yml` 用 trusted publishing 發布），
 `manifest/` 有一本五章的示範手冊，`agent/` 有 `UI-MAP.md`、`QUIRKS.md`、`STYLE.md` 與兩章 manifest few-shot 範例，
-`docs/` 五章都有中英文正文；`plugin/` 還只有 `.gitkeep`（Day 28）。
+`docs/` 五章都有中英文正文；`plugin/` 是 Claude Code plugin `manual`（skills、subagents、validate hook），repo 根目錄的 `.claude-plugin/` 讓它可以直接當 marketplace 安裝。
 
 ## 授權
 
